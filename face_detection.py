@@ -2,6 +2,7 @@ import cv2
 
 # carrega o modelo frontalface-default
 faceCascade = cv2.CascadeClassifier("resources/haarcascades/haarcascade_frontalface_default.xml")
+eyeCascade = cv2.CascadeClassifier("resources/haarcascades/haarcascade_eye.xml")
 
 # lê a imagem que terá as faces identificadas
 img = cv2.imread('resources/parque_da_cidade.jpg')
