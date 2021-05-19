@@ -50,20 +50,20 @@ while True:
     ret, frame = video_capture.read()
 
     # Find all the faces and face encodings in the current frame of video
-    face_locations = face_recognition.face_locations(output)
-    print("Found {} faces in image.".format(len(face_locations)))
-    face_encodings = face_recognition.face_encodings(output, face_locations)
+    face_locations = face_recognition.face_locations(frame)
+    print("Encontramos {} faces.".format(len(face_locations)))
+    face_encodings = face_recognition.face_encodings(frame, face_locations)
 
     # Loop over each face found in the frame to see if it's someone we know.
     for face_encoding in face_encodings:
         # See if the face is a match for the known face(s)
-        match = face_recognition.compare_faces([obama_face_encoding], face_encoding)
+
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
         name = "Desconhecido"
 
-        if match[0]:
-            name = "Barack Obama"
-        elif match[1]:
-            name = "Joe Biden"
-        elif match[2]:
-            name = "Caseh"
-        print("Encontrado: {}!".format(name))
+        face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+        best_match_index = np.argmin(face_distances)
+        if matches[best_match_index]:
+            name = known_face_names[best_match_index]
+            print("Encontramos {} faces na imagem.".format(len(face_locations)))
+            print("Encontrado: {}!".format(name))
