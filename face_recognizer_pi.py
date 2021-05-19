@@ -18,9 +18,27 @@ video_capture.set(4, 240)
 output = np.empty((240, 320, 3), dtype=np.uint8)
 
 # Load a sample picture and learn how to recognize it.
-print("Loading known face image(s)")
+print("carregando imagens autorizadas...")
 obama_image = face_recognition.load_image_file("resources/obama.jpg")
 obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
+
+biden_image = face_recognition.load_image_file("resources/biden.jpg")
+biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
+
+caseh_image = face_recognition.load_image_file("resources/caseh.jpg")
+caseh_face_encoding = face_recognition.face_encodings(caseh_image)[0]
+
+known_face_encodings = [
+    caseh_face_encoding,
+    obama_face_encoding,
+    biden_face_encoding
+]
+known_face_names = [
+    "Carlos Andre",
+    "Barack Obama",
+    "Joe Biden"
+]
+
 
 # Initialize some variables
 face_locations = []
@@ -28,11 +46,8 @@ face_encodings = []
 
 while True:
     print("Capturing image.")
-    # Grab a single frame of video
+    # Grab a single frame of video from the RPi camera as a numpy array
     ret, frame = video_capture.read()
-
-    # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-    rgb_frame = frame[:, :, ::-1]
 
     # Find all the faces and face encodings in the current frame of video
     face_locations = face_recognition.face_locations(output)
@@ -43,9 +58,12 @@ while True:
     for face_encoding in face_encodings:
         # See if the face is a match for the known face(s)
         match = face_recognition.compare_faces([obama_face_encoding], face_encoding)
-        name = "<Unknown Person>"
+        name = "Desconhecido"
 
         if match[0]:
             name = "Barack Obama"
-
-        print("I see someone named {}!".format(name))
+        elif match[1]:
+            name = "Joe Biden"
+        elif match[2]:
+            name = "Caseh"
+        print("Encontrado: {}!".format(name))
