@@ -15,7 +15,6 @@ video_capture = cv2.VideoCapture('/dev/video2')
 caseh_image = face_recognition.load_image_file("resources/caseh.jpg")
 caseh_face_encoding = face_recognition.face_encodings(caseh_image)[0]
 
-
 # Load a sample picture and learn how to recognize it.
 obama_image = face_recognition.load_image_file("resources/obama.jpg")
 obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
@@ -39,7 +38,6 @@ known_face_names = [
 while True:
     # Grab a single frame of video
     ret, frame = video_capture.read()
-
 
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
     rgb_frame = frame[:, :, ::-1]

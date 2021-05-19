@@ -1,7 +1,8 @@
 import cv2
 
-cap = cv2.VideoCapture('/dev/video0')
-
+cap = cv2.VideoCapture('/dev/video2')
+cap.set(3, 320)
+cap.set(4, 240)
 while True:
 
     ret, frame = cap.read()
