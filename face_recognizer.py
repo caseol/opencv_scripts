@@ -10,10 +10,10 @@ import numpy as np
 # specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
 
 # Get a reference to webcam #0 (the default one)
-video_capture = cv2.VideoCapture('/dev/video0')
+video_capture = cv2.VideoCapture('/dev/video2')
 
-#caseh_image = face_recognition.load_image_file("resources/caseh.jpg")
-#caseh_face_encoding = face_recognition.face_encodings(caseh_image)[0]
+caseh_image = face_recognition.load_image_file("resources/caseh.jpg")
+caseh_face_encoding = face_recognition.face_encodings(caseh_image)[0]
 
 
 # Load a sample picture and learn how to recognize it.
@@ -26,6 +26,7 @@ biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
 
 # Create arrays of known face encodings and their names
 known_face_encodings = [
+    caseh_face_encoding,
     obama_face_encoding,
     biden_face_encoding
 ]
@@ -65,11 +66,12 @@ while True:
         if matches[best_match_index]:
             name = known_face_names[best_match_index]
 
+        final_color = ((0, 0, 255) if name == 'Desconhecido' else (0, 255, 0))
         # Draw a box around the face
-        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+        cv2.rectangle(frame, (left, top), (right, bottom), final_color, 2)
 
         # Draw a label with a name below the face
-        cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+        cv2.rectangle(frame, (left, bottom - 35), (right, bottom), final_color, cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.6, (255, 255, 255), 1)
 
