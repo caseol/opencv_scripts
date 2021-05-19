@@ -2,4 +2,5 @@
 output/
 facepi.zip
 venv/
+__pycache__/
 

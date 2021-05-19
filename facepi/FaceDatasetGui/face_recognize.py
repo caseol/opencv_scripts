@@ -5,7 +5,7 @@ import imutils
 from imutils import paths
 from imutils.video import VideoStream
 from imutils.video import FPS
-import face_recognition
+import face_recognizer
 import pickle
 import time
 import cv2
@@ -34,11 +34,11 @@ for (i, imagePath) in enumerate(imagePaths):
 
 	# detect the (x, y)-coordinates of the bounding boxes
 	# corresponding to each face in the input image
-	boxes = face_recognition.face_locations(rgb,
-		model='hog')
+	boxes = face_recognizer.face_locations(rgb,
+                                           model='hog')
 
 	# compute the facial embedding for the face
-	encodings = face_recognition.face_encodings(rgb, boxes)
+	encodings = face_recognizer.face_encodings(rgb, boxes)
 
 	# loop over the encodings
 	for encoding in encodings:
@@ -91,15 +91,15 @@ while True:
 	boxes = [(y, x + w, y + h, x) for (x, y, w, h) in rects]
 
 	# compute the facial embeddings for each face bounding box
-	encodings = face_recognition.face_encodings(rgb, boxes)
+	encodings = face_recognizer.face_encodings(rgb, boxes)
 	names = []
 
 	# loop over the facial embeddings
 	for encoding in encodings:
 		# attempt to match each face in the input image to our known
 		# encodings
-		matches = face_recognition.compare_faces(data["encodings"],
-			encoding)
+		matches = face_recognizer.compare_faces(data["encodings"],
+                                                encoding)
 		name = "Unknown"
 
 		# check to see if we have found a match

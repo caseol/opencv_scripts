@@ -12,7 +12,6 @@ imgGray = cv2.cvtColor(imgResize, cv2.COLOR_RGB2GRAY)
 
 faces = faceCascade.detectMultiScale(imgGray, 1.09, 3)
 
-print(faces.shape)
 for (x, y, w, h) in faces:
     cv2.rectangle(imgResize, (x, y), (x + w, y + h), (255, 0, 0), 1, 4)
 
