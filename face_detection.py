@@ -15,5 +15,5 @@ faces = faceCascade.detectMultiScale(imgGray, 1.09, 3)
 for (x, y, w, h) in faces:
     cv2.rectangle(imgResize, (x, y), (x + w, y + h), (255, 0, 0), 1, 4)
 
-cv2.imshow("Resultado", imgResize)
-cv2.waitKey(0)
+#cv2.imshow("Resultado", imgResize)
+#cv2.waitKey(0)
