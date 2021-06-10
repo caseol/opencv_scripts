@@ -3,16 +3,7 @@ import datetime
 import os
 from pathlib import Path
 
-def get_file_size(file_path):
-     size = os.path.getsize(file_path)
-     return size
-
-def get_file_size_2(file):
-     stat = os.stat(file)
-     size = stat.st_size
-     return size
-
-def get_file_size_3(file):
+def get_file_size(file):
      size = Path(file).stat().st_size
      return size
 
@@ -37,14 +28,15 @@ output = cv2.VideoWriter("videos/cam_video0.avi", vid_cod, 20.0, (640,480))
 
 while(True):
      # verifica se o tamanho do arquivo e para ou não a gravação
+     dt = str(datetime.datetime.now())
      video_size = convert_bytes(get_file_size("videos/cam_video0.avi"), "MB")
-     if video_size > 50:
+     actual_minute = int(str(datetime.datetime.now().strftime('%M')))
+     if video_size > 10:
           break
      # Capture each frame of webcam video
      ret,frame = vid_capture.read()
      if ret:
           font = cv2.FONT_HERSHEY_SIMPLEX
-          dt = str(datetime.datetime.now())
           frame = cv2.putText(frame, dt, (5, 80), font, 1, (0, 0, 0), 4, cv2.INTER_LINEAR_EXACT)
 
      cv2.imshow("My cam video", frame)

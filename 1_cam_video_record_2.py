@@ -27,17 +27,17 @@ def convert_bytes(size, unit=None):
           return size
 
 #Capture video from webcam
-vid_capture = cv2.VideoCapture('/dev/video0')
+vid_capture = cv2.VideoCapture('/dev/video2')
 vid_capture.set(1, 20.0) #Match fps
 vid_capture.set(3,640)   #Match width
 vid_capture.set(4,480)   #Match height
 
 vid_cod = cv2.VideoWriter_fourcc(*'XVID')
-output = cv2.VideoWriter("videos/cam_video0.avi", vid_cod, 20.0, (640,480))
+output = cv2.VideoWriter("videos/cam_video2.avi", vid_cod, 20.0, (640,480))
 
 while(True):
      # verifica se o tamanho do arquivo e para ou não a gravação
-     video_size = convert_bytes(get_file_size("videos/cam_video0.avi"), "MB")
+     video_size = convert_bytes(get_file_size("videos/cam_video2.avi"), "MB")
      if video_size > 50:
           break
      # Capture each frame of webcam video
