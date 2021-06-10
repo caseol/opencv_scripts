@@ -1,5 +1,7 @@
 .idea/
 output/
+videos/
+videos/*
 facepi.zip
 venv/
 __pycache__/
