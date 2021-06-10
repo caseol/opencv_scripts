@@ -37,7 +37,7 @@ output = cv2.VideoWriter("videos/cam_video0.mp4", vid_cod, 20.0, (640,480))
 
 while(True):
      # verifica se o tamanho do arquivo e para ou não a gravação
-     video_size = convert_bytes(get_file_size("videos/cam_video0.mp4"), "MB")
+     video_size = convert_bytes(get_file_size("videos/cam_video0.mp4"), "GB")
      if video_size > 10:
           break
      # Capture each frame of webcam video
