@@ -3,16 +3,7 @@ import datetime
 import os
 from pathlib import Path
 
-def get_file_size(file_path):
-     size = os.path.getsize(file_path)
-     return size
-
-def get_file_size_2(file):
-     stat = os.stat(file)
-     size = stat.st_size
-     return size
-
-def get_file_size_3(file):
+def get_file_size(file):
      size = Path(file).stat().st_size
      return size
 
@@ -45,7 +36,7 @@ while(True):
      if ret:
           font = cv2.FONT_HERSHEY_SIMPLEX
           dt = str(datetime.datetime.now())
-          frame = cv2.putText(frame, dt, (5, 80), font, 1, (0, 0, 0), 4, cv2.INTER_LINEAR_EXACT)
+          frame = cv2.putText(frame, dt, (120, 20), font, 0.7, (0, 0, 0), 2, cv2.INTER_LINEAR_EXACT)
 
      cv2.imshow("My cam video", frame)
      output.write(frame)
