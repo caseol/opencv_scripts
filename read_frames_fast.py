@@ -37,6 +37,7 @@ args = vars(ap.parse_args())
 video_source = args["video"]
 show_video = args["show"]
 record_video = args["record"]
+last_minute = -1
 # start the file video stream thread and allow the buffer to
 # start to fill
 print("[INFO] starting video thread from: " + video_source)
@@ -52,7 +53,7 @@ fps = FPS().start()
 
 # Set up codec and output video settings
 codec = cv2.VideoWriter_fourcc('M','J','P','G')
-output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_init.avi", codec, 20, (640,480))
+output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_init.avi", codec, 18, (640,480))
 
 webcam_videowriter = SaveVideoOutput(video_source, output_video)
 
@@ -74,14 +75,31 @@ while fvs.running():
 	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
 	# grava o frame no vídeo
-	if record_video  and frame is not None:
+	if record_video == 'True':
+		dtn = datetime.datetime.now()
+		minute = int(dtn.strftime('%M'))
+		print("[INFO] Minute: " + str(minute) + " of " + str(dtn.strftime('%Y-%m-%d_%H_%M')))
+		print("[INFO] (last_minute != minute): " + str(last_minute != minute))
+		print("[INFO] (minute % 2 == 0) and (last_minute != minute): " + str((minute % 2 == 0) and (last_minute != minute)))
+		if (minute % 10 == 0) and (last_minute != minute):
+			last_minute = minute
+			output_video.release()
+			output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M')  + ".avi", codec, 18, (640, 480))
+			webcam_videowriter = SaveVideoOutput(video_source, output_video)
+
 		webcam_videowriter.save_frame(frame)
 
 	# show the frame and update the FPS counter
-	if show_video and frame is not None:
+	if show_video == 'True':
 		webcam_videowriter.show_frame(frame)
 
-	cv2.waitKey(1)
+	# Press Q on keyboard to stop recording
+	key = cv2.waitKey(1)
+	if key == ord('q'):
+		output_video.release()
+		cv2.destroyAllWindows()
+		exit(1)
+
 	if fvs.Q.qsize() < 2:  # If we are low on frames, give time to producer
 		time.sleep(0.001)  # Ensures producer runs now, so 2 is sufficient
 	fps.update()
