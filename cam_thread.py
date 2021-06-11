@@ -1,5 +1,6 @@
 from pathlib import Path
 from threading import Thread
+from util.save_video_output import FileVideoStream
 import cv2, time, datetime
 
 class VideoStreamWidget(object):
@@ -21,14 +22,17 @@ class VideoStreamWidget(object):
         while True:
             if (self.capture.isOpened()):
                 (self.status, self.frame) = self.capture.read()
-                if (self.status):
-                    font = cv2.FONT_HERSHEY_SIMPLEX
-                    # dt = str(datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
-                    dt = str(datetime.datetime.now())
-                    frame = cv2.putText(self.frame, dt, (348, 20), font, 0.7, (0, 0, 0), 2, cv2.INTER_LINEAR_EXACT)
-                    self.output.write(self.frame)
+                #if (self.status):
+                    # self.save_output()
 
             time.sleep(.01)
+
+    def save_output(self):
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        # dt = str(datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
+        dt = str(datetime.datetime.now())
+        frame = cv2.putText(self.frame, dt, (348, 20), font, 0.7, (0, 0, 0), 2, cv2.INTER_LINEAR_EXACT)
+        self.output.write(self.frame)
 
     def show_frame(self):
         # Display frames in main program
@@ -45,10 +49,11 @@ class VideoStreamWidget(object):
 
 if __name__ == '__main__':
     video_stream_widget0 = VideoStreamWidget('/dev/video0')
-    video_stream_widget2 = VideoStreamWidget('/dev/video2')
+    # video_stream_widget2 = VideoStreamWidget('/dev/video2')
+    #video_stream_widget0 = FileVideoStream('/dev/video0')
     while True:
         try:
             video_stream_widget0.show_frame()
-            video_stream_widget2.show_frame()
+            # video_stream_widget2.show_frame()
         except AttributeError:
             pass
