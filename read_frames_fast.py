@@ -42,7 +42,7 @@ last_minute = -1
 # start to fill
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
-fvs = FileVideoStream(args["video"]).start()
+fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
 # define o codec para a criação do vídeo
 #vid_cod = cv2.VideoWriter_fourcc(*'XVID')
