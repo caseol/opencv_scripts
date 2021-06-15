@@ -9,12 +9,13 @@ if sys.version_info >= (3, 0):
     from queue import Queue
 
 class FileVideoStream:
-    def __init__(self, path, transform=None, queue_size=128):
+    def __init__(self, path, transform=None, queue_size=256):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
         self.stream = cv2.VideoCapture(path)
         self.stopped = False
         self.transform = transform
+        self.source = path
 
         # initialize the queue used to store frames read from
         # the video file
