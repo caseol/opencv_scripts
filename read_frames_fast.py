@@ -9,7 +9,7 @@
 # python read_frames_fast.py --video videos/jurassic_park_intro.mp4
 
 # import the necessary packages
-from imutils.video import FileVideoStream
+from util.imutis.file_video_stream import FileVideoStream
 from util.save_video_output import SaveVideoOutput
 from imutils.video import FPS
 import numpy as np
@@ -42,7 +42,7 @@ last_minute = -1
 # start to fill
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
-fvs = FileVideoStream(args["video"]).start()
+fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
 # define o codec para a criação do vídeo
 #vid_cod = cv2.VideoWriter_fourcc(*'XVID')
@@ -71,8 +71,8 @@ while fvs.running():
 
 	# display the size of the queue on the frame
 	dt = str(datetime.datetime.now())
-	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 2)
+	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 2)
 
 	# grava o frame no vídeo
 	if record_video == 'True':
@@ -96,8 +96,16 @@ while fvs.running():
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q'):
+		# salva
 		output_video.release()
 		cv2.destroyAllWindows()
+		fps.stop()
+		print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+		print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+
+		# do a bit of cleanup
+		cv2.destroyAllWindows()
+		fvs.stop()
 		exit(1)
 
 	if fvs.Q.qsize() < 2:  # If we are low on frames, give time to producer
