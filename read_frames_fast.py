@@ -54,7 +54,7 @@ fps = FPS().start()
 
 # Set up codec and output video settings
 codec = cv2.VideoWriter_fourcc('M','J','P','G')
-output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_init.avi", codec, 18, (640,480))
+output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_init.avi", codec, 12, (640,480))
 
 # webcam_videowriter = SaveVideoOutput(video_source, output_video)
 
@@ -74,7 +74,7 @@ while fvs.running():
 			last_minute = minute
 			output_video.release()
 			output_path = "videos/" + video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M')  + ".avi"
-			output_video = cv2.VideoWriter(output_path, codec, 18, (640, 480))
+			output_video = cv2.VideoWriter(output_path, codec, 12, (640, 480))
 			print("[INFO] ")
 
 		output_video.write(frame)
