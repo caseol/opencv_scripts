@@ -19,9 +19,16 @@ import time, datetime
 import cv2
 
 def filterFrame(frame):
-	frame = imutils.resize(frame, width=450)
-	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	frame = np.dstack([frame, frame, frame])
+	# display the size of the queue on the frame
+	#frame = imutils.resize(frame, width=640)
+	#frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+	#frame = np.dstack([frame, frame, frame])
+
+	dt = str(datetime.datetime.now())
+	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
 	return frame
 
 # construct the argument parse and parse the arguments
@@ -42,20 +49,14 @@ last_minute = -1
 # start to fill
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
-fvs = FileVideoStream(args["video"], transform=filterFrame).start()
-
-# define o codec para a criação do vídeo
-#vid_cod = cv2.VideoWriter_fourcc(*'XVID')
-# define o output do arquivo com 20 FPS e dimensão 640x480
-#output = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_init.avi", vid_cod, 20.0, (640, 480))
-
+fvs = FileVideoStream(args["video"], transform=filterFrame, queue_size=256).start()
 fps = FPS().start()
 
 # Set up codec and output video settings
 codec = cv2.VideoWriter_fourcc('M','J','P','G')
 output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_init.avi", codec, 18, (640,480))
 
-webcam_videowriter = SaveVideoOutput(video_source, output_video)
+# webcam_videowriter = SaveVideoOutput(video_source, output_video)
 
 # loop over frames from the video file stream
 while fvs.running():
@@ -64,41 +65,30 @@ while fvs.running():
 	# channels)
 	frame = fvs.read()
 
-	# Relocated filtering into producer thread with transform=filterFrame
-	#  Python 2.7: FPS 92.11 -> 131.36
-	#  Python 3.7: FPS 41.44 -> 50.11
-	#frame = filterFrame(frame)
-
-	# display the size of the queue on the frame
-	dt = str(datetime.datetime.now())
-	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
 	# grava o frame no vídeo
 	if record_video == 'True':
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
-		print("[INFO] Minute: " + str(minute) + " of " + str(dtn.strftime('%Y-%m-%d_%H_%M')))
-		print("[INFO] (last_minute != minute): " + str(last_minute != minute))
-		print("[INFO] (minute % 2 == 0) and (last_minute != minute): " + str((minute % 2 == 0) and (last_minute != minute)))
+
 		if (minute % 10 == 0) and (last_minute != minute):
 			last_minute = minute
 			output_video.release()
-			output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M')  + ".avi", codec, 18, (640, 480))
-			webcam_videowriter = SaveVideoOutput(video_source, output_video)
+			output_path = "videos/" + video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M')  + ".avi"
+			output_video = cv2.VideoWriter(output_path, codec, 18, (640, 480))
+			print("[INFO] ")
 
-		webcam_videowriter.save_frame(frame)
+		output_video.write(frame)
 
 	# show the frame and update the FPS counter
 	if show_video == 'True':
-		webcam_videowriter.show_frame(frame)
+		cv2.imshow(video_source, frame)
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q'):
 		output_video.release()
 		cv2.destroyAllWindows()
-		exit(1)
+		break
 
 	if fvs.Q.qsize() < 2:  # If we are low on frames, give time to producer
 		time.sleep(0.001)  # Ensures producer runs now, so 2 is sufficient
@@ -112,3 +102,4 @@ print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 # do a bit of cleanup
 cv2.destroyAllWindows()
 fvs.stop()
+exit(1)

@@ -28,6 +28,13 @@ class SaveVideoOutput(object):
             self.frame = frame
             cv2.imshow(self.source, self.frame)
 
+        # Press Q on keyboard to stop recording
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            self.output_video.release()
+            cv2.destroyAllWindows()
+            exit(1)
+
     def save_frame(self, frame):
         # Save obtained frame into video output file
         self.output_video.write(frame)
