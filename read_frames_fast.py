@@ -20,10 +20,10 @@ import cv2
 
 def filterFrame(frame):
 	# display the size of the queue on the frame
-	#frame = imutils.resize(frame, width=640)
-	#frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	frame = imutils.resize(frame, width=640)
+	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-	#frame = np.dstack([frame, frame, frame])
+	frame = np.dstack([frame, frame, frame])
 
 	dt = str(datetime.datetime.now())
 	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
