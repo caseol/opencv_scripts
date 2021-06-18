@@ -10,7 +10,7 @@
 
 # import the necessary packages
 from util.imutils.filevideostream import FileVideoStream
-from util.save_video_output import SaveVideoOutput
+from util.imutils.save_video_output import SaveVideoOutput
 from queue import Queue
 from imutils.video import FPS
 import numpy as np
@@ -72,12 +72,6 @@ while fvs.running():
 	# it, and convert it to grayscale (while still retaining 3
 	# channels)
 	frame = fvs.read()
-
-	# grava o frame no vídeo
-	if record_video == 'True':
-		dtn = datetime.datetime.now()
-		minute = int(dtn.strftime('%M'))
-
 	# show the frame and update the FPS counter
 	if show_video == 'True':
 		cv2.imshow(video_source, frame)

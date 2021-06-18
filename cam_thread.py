@@ -1,6 +1,5 @@
 from pathlib import Path
 from threading import Thread
-from util.save_video_output import FileVideoStream
 import cv2, time, datetime
 
 class VideoStreamWidget(object):

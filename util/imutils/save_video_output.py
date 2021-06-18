@@ -17,7 +17,7 @@ class SaveVideoOutput(object):
         # Set up codec and output video settings
         self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
         self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M') + ".avi"
-        self.output_video = cv2.VideoWriter(self.output_path, self.codec, 20, (640, 480))
+        self.output_video = cv2.VideoWriter(self.output_path, self.codec, 12, (640, 480))
 
         # inicializa variável do frame
         self.frame = 0
@@ -44,7 +44,7 @@ class SaveVideoOutput(object):
                 last_minute = minute
                 self.output_video.release()
                 self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
-                self.output_video = cv2.VideoWriter(self.output_path, self.codec, 20, (640, 480))
+                self.output_video = cv2.VideoWriter(self.output_path, self.codec, 12, (640, 480))
                 print("[INFO] " + self.output_path + " criado!")
 
             self.output_video.write(self.frame)
