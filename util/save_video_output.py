@@ -49,6 +49,9 @@ class SaveVideoOutput(object):
 
             self.output_video.write(self.frame)
             print("[INFO] frame saved! " + self.output_path)
+        else:
+            print("[INFO] parou! " + self.output_path)
+
 
 
     def show_frame(self, frame):
