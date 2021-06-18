@@ -3,11 +3,11 @@ import cv2, time, datetime
 
 
 class SaveVideoOutput(object):
-    def __init__(self, source, queue):
+    def __init__(self, source, queue, fps=12):
         # flag control
         self.stopped = False
-
         self.Q = queue
+        self.fps = fps
 
         # name of the source
         self.video_source = source
@@ -17,7 +17,7 @@ class SaveVideoOutput(object):
         # Set up codec and output video settings
         self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
         self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M') + ".avi"
-        self.output_video = cv2.VideoWriter(self.output_path, self.codec, 12, (640, 480))
+        self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
 
         # inicializa variável do frame
         self.frame = 0
@@ -44,21 +44,20 @@ class SaveVideoOutput(object):
                 last_minute = minute
                 self.output_video.release()
                 self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
-                self.output_video = cv2.VideoWriter(self.output_path, self.codec, 12, (640, 480))
+                self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
                 print("[INFO] " + self.output_path + " criado!")
 
             self.output_video.write(self.frame)
             print("[INFO] frame saved! " + self.output_path)
         else:
-            print("[INFO] parou! " + self.output_path)
+            print("[INFO] fila vazia! Recarregando..." + self.output_path)
+            time.sleep(0.1)  # Rest for 10ms, we have a full queue
 
-
+        print("[INFO] Fim da gravação" + self.output_path)
 
     def show_frame(self, frame):
         # Display frames in main program
-        if frame is not None:
-            self.frame = frame
-            cv2.imshow(self.source, self.frame)
+        cv2.imshow(self.source, self.frame)
 
         # Press Q on keyboard to stop recording
         key = cv2.waitKey(1)

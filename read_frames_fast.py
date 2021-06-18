@@ -47,11 +47,14 @@ ap.add_argument("-s", "--show", required=False,
 	help="show video")
 ap.add_argument("-r", "--record", required=True,
 	help="save video output")
+ap.add_argument("-f", "--fps", required=True,
+	help="path to USB device")
 args = vars(ap.parse_args())
 
 video_source = args["video"]
 show_video = args["show"]
 record_video = args["record"]
+fps_to_video = args["fps"]
 last_minute = -1
 # start the file video stream thread and allow the buffer to
 # start to fill
@@ -62,9 +65,9 @@ queue = Queue(maxsize=256)
 fvs = FileVideoStream(args["video"], queue, transform=timestampFrame).start()
 fps = FPS().start()
 
-webcam_videowriter = None
+svo = None
 if record_video == 'True':
-	webcam_videowriter = SaveVideoOutput(video_source, queue).start()
+	svo = SaveVideoOutput(video_source, queue).start()
 
 # loop over frames from the video file stream
 while fvs.running():
