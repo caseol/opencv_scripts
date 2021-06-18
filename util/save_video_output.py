@@ -17,7 +17,7 @@ class SaveVideoOutput(object):
         # Set up codec and output video settings
         self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
         self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M') + ".avi"
-        self.output_video = cv2.VideoWriter(self.output_path, self.codec, 12, (640, 480))
+        self.output_video = cv2.VideoWriter(self.output_path, self.codec, 20, (640, 480))
 
         # inicializa variável do frame
         self.frame = 0
@@ -44,7 +44,7 @@ class SaveVideoOutput(object):
                 last_minute = minute
                 self.output_video.release()
                 self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
-                self.output_video = cv2.VideoWriter(self.output_path, self.codec, 12, (640, 480))
+                self.output_video = cv2.VideoWriter(self.output_path, self.codec, 20, (640, 480))
                 print("[INFO] " + self.output_path + " criado!")
 
             self.output_video.write(self.frame)
@@ -70,8 +70,8 @@ class SaveVideoOutput(object):
     def more(self):
         # return True if there are still frames in the queue. If stream is not stopped, try to wait a moment
         tries = 0
-        while self.Q.qsize() == 0 and not self.stopped and tries < 5:
-            time.sleep(0.1)
+        while self.Q.qsize() == 0 and not self.stopped and tries < 10:
+            time.sleep(0.2)
             tries += 1
 
         return self.Q.qsize() > 0
