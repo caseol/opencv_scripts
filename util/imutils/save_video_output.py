@@ -34,24 +34,31 @@ class SaveVideoOutput(object):
     def save_frame(self):
         # Read the next frame from the stream in a different thread
         last_minute = -1
-        while not self.stopped and self.more():
-            self.frame = self.Q.get()
+        while True:
+            # if the thread indicator variable is set, stop the
+            # thread
+            if self.stopped:
+                break
 
-            dtn = datetime.datetime.now()
-            minute = int(dtn.strftime('%M'))
+            # otherwise, ensure the queue has room in it
+            if not self.Q.full():
+                self.frame = self.Q.get()
 
-            if (minute % 10 == 0) and (last_minute != minute):
-                last_minute = minute
-                self.output_video.release()
-                self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
-                self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
-                print("[INFO] " + self.output_path + " criado!")
+                dtn = datetime.datetime.now()
+                minute = int(dtn.strftime('%M'))
 
-            self.output_video.write(self.frame)
-            print("[INFO] frame saved! " + self.output_path)
-        else:
-            print("[INFO] fila vazia! Recarregando..." + self.output_path)
-            time.sleep(0.1)  # Rest for 10ms, we have a full queue
+                if (minute % 10 == 0) and (last_minute != minute):
+                    last_minute = minute
+                    self.output_video.release()
+                    self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
+                    self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
+                    print("[INFO] " + self.output_path + " criado!")
+
+                self.output_video.write(self.frame)
+                print("[INFO] frame saved! " + self.output_path)
+            else:
+                print("[INFO] fila vazia! Recarregando..." + self.output_path)
+                time.sleep(0.1)  # Rest for 10ms, we have a full queue
 
         print("[INFO] Fim da gravação" + self.output_path)
 
