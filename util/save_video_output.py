@@ -33,7 +33,7 @@ class SaveVideoOutput(object):
 
     def save_frame(self):
         # Read the next frame from the stream in a different thread
-
+        last_minute = -1
         while not self.stopped and self.more():
             self.frame = self.Q.get()
 

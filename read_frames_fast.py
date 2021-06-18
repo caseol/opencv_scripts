@@ -34,7 +34,7 @@ def filterFrame(frame):
 
 def timestampFrame(frame):
 	dt = str(datetime.datetime.now())
-	#cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
 	return frame
@@ -59,7 +59,7 @@ print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
 queue = Queue(maxsize=256)
-fvs = FileVideoStream(args["video"], queue, transform=filterFrame).start()
+fvs = FileVideoStream(args["video"], queue, transform=timestampFrame).start()
 fps = FPS().start()
 
 webcam_videowriter = None
