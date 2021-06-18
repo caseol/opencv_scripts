@@ -9,8 +9,9 @@
 # python read_frames_fast.py --video videos/jurassic_park_intro.mp4
 
 # import the necessary packages
-from imutils.video import FileVideoStream
+from util.imutils.filevideostream import FileVideoStream
 from util.save_video_output import SaveVideoOutput
+from queue import Queue
 from imutils.video import FPS
 import numpy as np
 import argparse
@@ -27,6 +28,13 @@ def filterFrame(frame):
 
 	dt = str(datetime.datetime.now())
 	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+	return frame
+
+def timestampFrame(frame):
+	dt = str(datetime.datetime.now())
+	#cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
 	return frame
@@ -49,14 +57,14 @@ last_minute = -1
 # start to fill
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
-fvs = FileVideoStream(args["video"], transform=filterFrame, queue_size=256).start()
+
+queue = Queue(maxsize=256)
+fvs = FileVideoStream(args["video"], queue, transform=filterFrame).start()
 fps = FPS().start()
 
-# Set up codec and output video settings
-codec = cv2.VideoWriter_fourcc('M','J','P','G')
-output_video = cv2.VideoWriter("videos/" + video_source.split('/')[-1] + "_init.avi", codec, 12, (640,480))
-
-# webcam_videowriter = SaveVideoOutput(video_source, output_video)
+webcam_videowriter = None
+if record_video == 'True':
+	webcam_videowriter = SaveVideoOutput(video_source, queue).start()
 
 # loop over frames from the video file stream
 while fvs.running():
@@ -70,15 +78,6 @@ while fvs.running():
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 
-		if (minute % 10 == 0) and (last_minute != minute):
-			last_minute = minute
-			output_video.release()
-			output_path = "videos/" + video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M')  + ".avi"
-			output_video = cv2.VideoWriter(output_path, codec, 12, (640, 480))
-			print("[INFO] ")
-
-		output_video.write(frame)
-
 	# show the frame and update the FPS counter
 	if show_video == 'True':
 		cv2.imshow(video_source, frame)
@@ -86,7 +85,6 @@ while fvs.running():
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q'):
-		output_video.release()
 		cv2.destroyAllWindows()
 		break
 

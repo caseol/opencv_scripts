@@ -4,13 +4,8 @@ import sys
 import cv2
 import time
 
-# import the Queue class from Python 3
-if sys.version_info >= (3, 0):
-	from queue import Queue
-
-
 class FileVideoStream:
-	def __init__(self, path, transform=None, queue_size=128):
+	def __init__(self, path, queue, transform=None):
 		# initialize the file video stream along with the boolean
 		# used to indicate if the thread should be stopped or not
 		self.stream = cv2.VideoCapture(path)
@@ -21,7 +16,8 @@ class FileVideoStream:
 
 		# initialize the queue used to store frames read from
 		# the video file
-		self.Q = Queue(maxsize=queue_size)
+		#self.Q = Queue(maxsize=queue_size)
+		self.Q = queue
 		# add the frame to the queue
 		if self.grabbed == 'True':
 			self.Q.put(self.frame)
