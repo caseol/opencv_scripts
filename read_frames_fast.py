@@ -33,7 +33,7 @@ def filterFrame(fr):
 	return fr
 
 def timestampFrame(fr):
-	frame = imutils.resize(fr, width=640)
+	fr = imutils.resize(fr, width=640)
 	dt = str(datetime.datetime.now())
 	cv2.putText(fr, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
@@ -62,7 +62,7 @@ print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
 queue = Queue(maxsize=256)
-fvs = FileVideoStream(args["video"], queue, transform=filterFrame).start()
+fvs = FileVideoStream(args["video"], queue, transform=timestampFrame).start()
 fps = FPS().start()
 
 svo = None
