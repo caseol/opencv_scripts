@@ -19,26 +19,25 @@ import imutils
 import time, datetime
 import cv2
 
-def filterFrame(frame):
+def filterFrame(fr):
 	# display the size of the queue on the frame
-	frame = imutils.resize(frame, width=640)
-	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	fr = imutils.resize(fr, width=640)
+	fr = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
 
-	frame = np.dstack([frame, frame, frame])
+	f = np.dstack([fr, fr, fr])
 
 	dt = str(datetime.datetime.now())
-	cv2.putText(frame, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+	cv2.putText(fr, "Queue Size: {}".format(fvs.Q.qsize()), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+	cv2.putText(fr, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-	return frame
+	return fr
 
-def timestampFrame(frame):
-	frame = imutils.resize(frame, width=640)
+def timestampFrame(fr):
+	frame = imutils.resize(fr, width=640)
 	dt = str(datetime.datetime.now())
+	cv2.putText(fr, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-	return frame
+	return fr
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
