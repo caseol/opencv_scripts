@@ -63,7 +63,7 @@ print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
 queue = Queue(maxsize=256)
-fvs = FileVideoStream(args["video"], queue, transform=timestampFrame).start()
+fvs = FileVideoStream(args["video"], queue, transform=filterFrame).start()
 fps = FPS().start()
 
 svo = None
