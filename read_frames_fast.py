@@ -33,7 +33,7 @@ def filterFrame(frame):
 	return frame
 
 def timestampFrame(frame):
-	#	frame = imutils.resize(frame, width=640)
+	frame = imutils.resize(frame, width=640)
 	dt = str(datetime.datetime.now())
 
 	cv2.putText(frame, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
