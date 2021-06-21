@@ -19,6 +19,4 @@ while True:
 
 cap.stop()
 cap2.stop()
-cap.release()
-cap2.release()
 cv2.destroyAllWindows()

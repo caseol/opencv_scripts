@@ -1,11 +1,12 @@
 # import the necessary packages
+from queue import Queue
 from threading import Thread
 import sys
 import cv2
 import time, datetime
 
 class FileVideoStream:
-	def __init__(self, path, queue, transform=None):
+	def __init__(self, path, queue=Queue(maxsize=256), transform=None):
 		# initialize the file video stream along with the boolean
 		# used to indicate if the thread should be stopped or not
 		self.stream = cv2.VideoCapture(path)

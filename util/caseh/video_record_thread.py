@@ -2,9 +2,9 @@ from queue import Queue
 from threading import Thread, Lock
 import cv2, time, datetime, imutils
 
-class VideoCaptureThreading:
+class VideoRecordThreading:
     def __init__(self, src=0, width=640, height=480):
-        self.Q = Queue(maxsize=32)
+        self.Q = Queue(maxsize=256)
         self.src = src
         self.cap = cv2.VideoCapture(self.src)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -18,10 +18,10 @@ class VideoCaptureThreading:
 
         self.read_lock = Lock()
 
-    def timestamp_frame(self, fr, qsize, fps):
+    def timestamp_frame(self, fr, fps):
         #fr = imutils.resize(fr, width=640)
         dt = str(datetime.datetime.now())
-        cv2.putText(fr, "Queue Size: " + str(int(qsize)) + " FPS: " + str(int(fps)), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        cv2.putText(fr, "Queue Size: " + self.Q.qsize() + " FPS: " + fps, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         cv2.putText(fr, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         return fr
 
@@ -39,25 +39,24 @@ class VideoCaptureThreading:
 
     def update(self):
         while self.started:
-            if not self.Q.full():
-                grabbed, frame = self.cap.read()
-                self.new_frame_time = time.time()
-                # Calculating the fps
+            grabbed, frame = self.cap.read()
+            self.new_frame_time = time.time()
 
-                # fps will be number of frame processed in given time frame
-                # since their will be most of time error of 0.001 second
-                # we will be subtracting it to get more accurate result
-                fps = 1 / (self.new_frame_time - self.prev_frame_time)
-                self.prev_frame_time = self.new_frame_time
+            # Calculating the fps
 
-                frame = self.timestamp_frame(frame, self.Q.qsize(),fps)
-                self.Q.put(frame)
-                with self.read_lock:
-                    self.grabbed = grabbed
-                    self.frame = frame
-            else:
-                time.sleep(0.1)  # Rest for 10ms, we have a full queue
-                
+            # fps will be number of frame processed in given time frame
+            # since their will be most of time error of 0.001 second
+            # we will be subtracting it to get more accurate result
+            fps = 1 / (self.new_frame_time - self.prev_frame_time)
+            self.prev_frame_time = self.new_frame_time
+
+            frame = self.timestamp_frame(frame, fps)
+
+            self.Q.put(frame)
+            with self.read_lock:
+                self.grabbed = grabbed
+                self.frame = frame
+
     def read(self):
         with self.read_lock:
             frame = self.Q.get()
