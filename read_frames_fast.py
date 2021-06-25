@@ -19,6 +19,7 @@ import imutils
 import time, datetime
 import cv2
 
+
 def filterFrame(fr):
 	# display the size of the queue on the frame
 	fr = imutils.resize(fr, width=640)
@@ -77,7 +78,8 @@ while fvs.running():
 	frame = fvs.read()
 	# show the frame and update the FPS counter
 	if show_video == 'True':
-		cv2.imshow(video_source, frame)
+		#cv2.imshow(video_source, frame)
+		svo.show_frame()
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)

@@ -57,14 +57,14 @@ class SaveVideoOutput(object):
                 self.output_video.write(self.frame)
                 print("[INFO] frame saved! " + self.output_path)
             else:
-                print("[INFO] fila vazia! Recarregando..." + self.output_path)
+                print("[INFO] fila cheia! dando tempo para o worker trabalhar..." + self.output_path)
                 time.sleep(0.1)  # Rest for 10ms, we have a full queue
 
         print("[INFO] Fim da gravação" + self.output_path)
 
-    def show_frame(self, frame):
+    def show_frame(self):
         # Display frames in main program
-        cv2.imshow(self.source, self.frame)
+        cv2.imshow(self.video_source, self.frame)
 
         # Press Q on keyboard to stop recording
         key = cv2.waitKey(1)
