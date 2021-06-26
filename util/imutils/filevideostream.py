@@ -84,22 +84,23 @@ class FileVideoStream:
 				# native threads and overheads of additional
 				# producer/consumer queues since this one was generally
 				# idle grabbing frames.
-				if self.transform:
+				if self.transform and frame != None:
 					frame = self.transform(frame)
 
 				dtn = datetime.datetime.now()
 				sec = int(dtn.strftime('%S'))
-
+				print("SEC: " + str(sec))
 				if (last_sec != sec):
-					last_sec = 0
+					frame_idx = 0
 				else:
-					last_sec = sec
 					frame_idx = frame_idx + 1
+				last_sec = sec
 
 				cv2.putText(frame, "FPS: " + fps + " Frame: " + str(frame_idx), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
 							(0, 255, 0), 2)
 				# add the frame to the queue
-				self.Q.put(frame)
+				if frame != None:
+					self.Q.put(frame)
 			else:
 				time.sleep(0.1)  # Rest for 10ms, we have a full queue
 
