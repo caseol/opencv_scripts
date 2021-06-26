@@ -1,6 +1,6 @@
 # import the necessary packages
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
 import sys
 import cv2
 import time, datetime
@@ -30,6 +30,7 @@ class FileVideoStream:
 		# intialize thread
 		self.thread = Thread(target=self.update, args=())
 		self.thread.daemon = True
+		self.read_lock = Lock()
 
 	def start(self):
 		# start a thread to read frames from the file video stream
@@ -71,7 +72,7 @@ class FileVideoStream:
 				if not grabbed:
 					self.stopped = True
 
-				if frame != None:
+				if frame is not None:
 					# if there are transforms to be done, might as well
 					# do them on producer thread before handing back to
 					# consumer thread. ie. Usually the producer is so far
@@ -89,14 +90,14 @@ class FileVideoStream:
 
 					dtn = datetime.datetime.now()
 					sec = int(dtn.strftime('%S'))
-					print("SEC: " + str(sec))
+
 					if (last_sec != sec):
 						frame_idx = 0
 					else:
 						frame_idx = frame_idx + 1
 					last_sec = sec
 
-					cv2.putText(frame, "FPS: " + fps + " Frame: " + str(frame_idx), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
+					cv2.putText(frame, "FPS: " + fps + "|Frame: " + str(frame_idx), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
 								(0, 255, 0), 2)
 					# add the frame to the queue
 					self.Q.put(frame)
