@@ -6,7 +6,7 @@ import cv2
 import time, datetime
 
 class FileVideoStream:
-	def __init__(self, path, queue=Queue(maxsize=256), transform=None):
+	def __init__(self, path, queue=Queue(maxsize=1024), transform=None):
 		# initialize the file video stream along with the boolean
 		# used to indicate if the thread should be stopped or not
 		self.stream = cv2.VideoCapture(path)
@@ -51,6 +51,14 @@ class FileVideoStream:
 			if not self.Q.full():
 				# read the next frame from the file
 				(grabbed, frame) = self.stream.read()
+
+				(h, w, c) = frame.shape[:3]
+
+				# display the image width, height, and number of channels to our
+				# terminal
+				print("width: {} pixels".format(frame.shape[1]))
+				print("height: {}  pixels".format(frame.shape[0]))
+				print("channels: {}".format(frame.shape[2]))
 				self.new_frame_time = time.time()
 				# Calculating the fps
 
