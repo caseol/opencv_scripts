@@ -56,12 +56,12 @@ class FileVideoStream:
 
 				# display the image width, height, and number of channels to our
 				# terminal
-				print("width: {} pixels".format(frame.shape[1]))
-				print("height: {}  pixels".format(frame.shape[0]))
-				print("channels: {}".format(frame.shape[2]))
-				self.new_frame_time = time.time()
-				# Calculating the fps
+				# print("width: {} pixels".format(frame.shape[1]))
+				# print("height: {}  pixels".format(frame.shape[0]))
+				# print("channels: {}".format(frame.shape[2]))
 
+				# Calculating the fps
+				self.new_frame_time = time.time()
 				# fps will be number of frame processed in given time frame
 				# since their will be most of time error of 0.001 second
 				# we will be subtracting it to get more accurate result
@@ -100,7 +100,7 @@ class FileVideoStream:
 					sec = int(dtn.strftime('%S'))
 
 					if (last_sec != sec):
-						frame_idx = 0
+						frame_idx = 1
 					else:
 						frame_idx = frame_idx + 1
 					last_sec = sec

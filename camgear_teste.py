@@ -15,7 +15,7 @@ def filterFrame(fr, fps):
 
 
 # open any valid video stream(for e.g `myvideo.avi` file)
-stream = CamGear(source="/dev/video4", logging=True, backend=0).start()
+stream = CamGear(source="/dev/video0", logging=True, backend=0).start()
 
 sleep(3)
 # loop over

@@ -1,71 +1,82 @@
-from queue import Queue
-from threading import Thread, Lock
-import cv2, time, datetime, imutils
+from threading import Thread
+import cv2, time, datetime
 
-class VideoRecordThreading:
-    def __init__(self, src=0, width=640, height=480):
-        self.Q = Queue(maxsize=256)
-        self.src = src
-        self.cap = cv2.VideoCapture(self.src)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self.grabbed, self.frame = self.cap.read()
-        self.started = False
 
-        # used to record the time at which we processed current frame
-        self.new_frame_time = 0
-        self.prev_frame_time = 0
+class VideoRecordThread(object):
+    def __init__(self, source, queue, fps=12):
+        # flag control
+        self.stopped = False
+        self.Q = queue
+        self.fps = fps
 
-        self.read_lock = Lock()
+        # name of the source
+        self.video_source = source
 
-    def timestamp_frame(self, fr, fps):
-        #fr = imutils.resize(fr, width=640)
-        dt = str(datetime.datetime.now())
-        cv2.putText(fr, "Queue Size: " + self.Q.qsize() + " FPS: " + fps, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-        cv2.putText(fr, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-        return fr
+        self.dt = datetime.datetime.now()
 
-    def set(self, var1, var2):
-        self.cap.set(var1, var2)
+        # Set up codec and output video settings
+        self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
+        self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M') + ".avi"
+        self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
+
+        # inicializa variável do frame
+        self.frame = 0
+
+        # Start the thread to read frames from the video stream
+        self.thread = Thread(target=self.save_frame, args=())
+        self.thread.daemon = True
 
     def start(self):
-        if self.started:
-            print('[!] Threaded video capturing has already been started.')
-            return None
-        self.started = True
-        self.thread = Thread(target=self.update, args=())
+        # start a thread to read frames from the file video stream
         self.thread.start()
         return self
 
-    def update(self):
-        while self.started:
-            grabbed, frame = self.cap.read()
-            self.new_frame_time = time.time()
+    def save_frame(self):
+        # Read the next frame from the stream in a different thread
+        last_minute = -1
+        while True:
+            # if the thread indicator variable is set, stop the
+            # thread
+            if self.stopped:
+                break
 
-            # Calculating the fps
+            # otherwise, ensure the queue has room in it
+            if not self.Q.full():
+                self.frame = self.Q.get()
 
-            # fps will be number of frame processed in given time frame
-            # since their will be most of time error of 0.001 second
-            # we will be subtracting it to get more accurate result
-            fps = 1 / (self.new_frame_time - self.prev_frame_time)
-            self.prev_frame_time = self.new_frame_time
+                dtn = datetime.datetime.now()
+                minute = int(dtn.strftime('%M'))
 
-            frame = self.timestamp_frame(frame, fps)
+                if (minute % 10 == 0) and (last_minute != minute):
+                    last_minute = minute
+                    self.output_video.release()
+                    self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
+                    self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
+                    print("[INFO] " + self.output_path + " criado!")
 
-            self.Q.put(frame)
-            with self.read_lock:
-                self.grabbed = grabbed
-                self.frame = frame
+                self.output_video.write(self.frame)
+            else:
+                print("[INFO] fila cheia! dando tempo para o worker trabalhar..." + self.output_path)
+                time.sleep(0.1)  # Rest for 10ms, we have a full queue
 
-    def read(self):
-        with self.read_lock:
-            frame = self.Q.get()
-            grabbed = self.grabbed
-        return grabbed, frame
+        print("[INFO] Fim da gravação" + self.output_path)
 
-    def stop(self):
-        self.started = False
-        self.thread.join()
+    def show_frame(self):
+        # Display frames in main program
+        cv2.imshow(self.video_source, self.frame)
 
-    def __exit__(self, exec_type, exc_value, traceback):
-        self.cap.release()
+        # Press Q on keyboard to stop recording
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            self.output_video.release()
+            cv2.destroyAllWindows()
+            exit(1)
+
+    def more(self):
+        # return True if there are still frames in the queue. If stream is not stopped, try to wait a moment
+        tries = 0
+        while self.Q.qsize() == 0 and not self.stopped and tries < 10:
+            time.sleep(0.2)
+            tries += 1
+
+        return self.Q.qsize() > 0
