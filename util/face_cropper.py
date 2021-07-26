@@ -18,7 +18,7 @@ class FaceCropper(object):
 
         img_bg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         try:
-            faces = self.face_cascade.detectMultiScale(img_bg, 1.1, 3, minSize=(120, 120))
+            faces = self.face_cascade.detectMultiScale(img_bg, 1.1, 3, minSize=(240, 240))
             if (faces is None):
                 print('[RECON] Falhou ao tentar detectar alguma face em %s ' % image_path)
                 return 0

@@ -3,16 +3,10 @@ from util.caseh.video_record_thread import VideoRecordThread
 from util.fullface.frame_recon import FrameReconFullFace
 from queue import Queue
 from imutils.video import FPS
-import base64
 import argparse
 import imutils
 import time, datetime, sys
 import cv2
-
-def getBase64(image):
-	with open(image, "rb") as img_file:
-		img64 = base64.b64encode(img_file.read()).decode('utf-8')
-	return img64
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
