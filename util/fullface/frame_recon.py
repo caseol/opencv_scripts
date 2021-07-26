@@ -43,6 +43,7 @@ class FrameReconFullFace:
         self.thread.daemon = True
 
         # Define LED de saída
+        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(23, GPIO.OUT)
 
     def start(self):
