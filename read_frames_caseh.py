@@ -3,7 +3,6 @@ from util.caseh.video_record_thread import VideoRecordThread
 from util.fullface.frame_recon import FrameReconFullFace
 from queue import Queue
 from imutils.video import FPS
-from pynput.keyboard import Listener, Key
 import base64
 import argparse
 import imutils
