@@ -72,7 +72,7 @@ while vct.running():
 		second = int(dtn.strftime('%S'))
 		if (second % 10 == 0):
 			frf.set_frame(frame, video_source)
-			print("[RECON] Minute: " + str(minute) + " Second: " + str(second))
+			print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)

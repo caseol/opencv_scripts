@@ -44,10 +44,12 @@ class FaceCropper(object):
                 nr = int(r * 2)
 
                 faceimg = img[ny:ny+nr, nx:nx+nr]
-                lastimg = cv2.resize(faceimg, (256, 256))
+                lastimg = cv2.resize(faceimg, (320, 320))
                 i += 1
                 # cv2.imwrite("output/image%d.jpg" % i, lastimg)
                 result = cv2.imwrite(str(output_path) + "/cropped_" + image_path.split('/')[2].split('.')[0] + "_" + str(i) + ".jpg", lastimg)
                 print('[RECON] Result: %s' % result)
+                return facecnt
+
         except Exception:
-            print('[RECON] Deu muita merda! %s' % sys.exc_info())
+            print('[RECON][def generate] Deu muita merda! %s' % sys.exc_info())

@@ -2,9 +2,13 @@
 output/
 videos/
 videos/*
+recon_bkp/
+recon/
+video0.log
+*.log
 *.avi
 *.mp4
 facepi.zip
 venv/
-__pycache__/
+*_pycache_*
 

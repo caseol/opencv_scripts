@@ -7,7 +7,7 @@ import datetime
 
 
 class FrameReconFullFace:
-    def __init__(self, path_todo='recon/todo/', path_cropped='recon/cropped/', path_done='recon/done/'):
+    def __init__(self, path_todo='recon/todo/', path_cropped='recon/cropped/', path_not_cropped='recon/not_cropped/' , path_done='recon/done/'):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
         self.stopped = False
@@ -23,7 +23,11 @@ class FrameReconFullFace:
         # incitialize paths
         self.path_todo = path_todo
         self.path_cropped = path_cropped
+        self.path_not_cropped = path_not_cropped
         self.path_done = path_done
+
+        self.recon_status = False
+        self.recon_retry = 0
 
         # intialize thread
         self.thread = Thread(target=self.recognize, args=())
@@ -44,25 +48,37 @@ class FrameReconFullFace:
         while True:
             # verifica se existem frames para croppar
             if self.frame is not None:
+                # inicia a data de recebimento do frame
                 dtn = datetime.datetime.now()
+                # monta o caminho para gravar o frame em todo
                 to_recon_todo = self.path_todo + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M_%S_%f') + ".jpg"
+                # grava o frame como arquivo
                 cv2.imwrite(to_recon_todo, self.frame)
                 print("[RECON] Frame saved at todo: " + to_recon_todo)
 
+                # inicia o reconhecedor de faces para cropar
                 detecter = FaceCropper()
+
+                ## percorre apasta '/recon/todo' para cropar as faces encontradas
                 for filename in os.listdir(self.path_todo):
                     try:
                         if filename.endswith(".jpg"):
                             to_recon_todo = self.path_todo + filename
-                            detecter.generate(to_recon_todo, self.path_cropped, False)
-                            print("[CROPPER] From: " + to_recon_todo + " To: " + self.path_cropped)
-                            shutil.move(to_recon_todo, self.path_done)
-                            continue
+
+                            # pega o arquivo para cropaar as faces encontradas e carrega como resultado a qto encontrada,
+                            # se não encontra faces, não cropamos mas copiamos o arquivo como não cropado para
+                            result = detecter.generate(to_recon_todo, self.path_cropped, False)
+                            if (result is not None) and (result > 0):
+                                print("[CROPPER] From: " + to_recon_todo + " To: " + self.path_cropped)
+                                shutil.move(to_recon_todo, self.path_done)
+                            else:
+                                print("[CROPPER] From: " + to_recon_todo + " To: " + self.path_not_cropped)
+                                shutil.move(to_recon_todo, self.path_not_cropped)
                         else:
                             print("[CROPPER] Sem arquivos em: " + self.path_todo)
-                            continue
+                        continue
                     except Exception:
-                        print("Deu merda! " +  str(sys.exc_info()))
+                        print("[CROPPER] Deu merda! " +  str(sys.exc_info()))
                 self.frame = None
 
     def get_token(self):
