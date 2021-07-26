@@ -43,8 +43,11 @@ class FrameReconFullFace:
         self.thread.daemon = True
 
         # Define LED de saída
+        GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(23, GPIO.OUT)
+        # PIN11 = GPIO17
+        GPIO.setup(11, GPIO.OUT)
+
 
     def start(self):
         # start a thread to read frames from the file video stream
@@ -119,7 +122,7 @@ class FrameReconFullFace:
                 headers = {
                     'Content-Type': 'application/json'
                 }
-                GPIO.output(23, GPIO.HIGH)
+                GPIO.output(11, GPIO.HIGH)
 
                 response = requests.request("POST", url, headers=headers, data=payload)
                 end = datetime.datetime.now()
