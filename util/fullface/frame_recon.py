@@ -92,6 +92,7 @@ class FrameReconFullFace:
         imgBase64 = []
         recon = None
         while True:
+            imgBase64 = []
             # verifica se existem frames para croppar
             if self.frame is not None:
                 # inicia a data de recebimento do frame
@@ -143,24 +144,32 @@ class FrameReconFullFace:
 
             if len(imgBase64) >= 4:
                 url = "http://www.fullfacelab.com/fffacerecognition_NC/autapi/users/authenticate"
-
+                token = self.get_token()
                 payload = json.dumps({
                     "projectName": "a94df8b7-90fd-49ac-9173-1f4da3782c6e",
-                    "accessToken": self.get_token(),
+                    "accessToken": token,
                     "keys": [],
                     "pictures": imgBase64
                 })
                 headers = {
                     'Content-Type': 'application/json'
                 }
-
-                response = requests.request("POST", url, headers=headers, data=payload)
-                end = datetime.datetime.now()
-                print("[RECON][Retorno Fullcace] " + response.text)
                 try:
-                    recon = response.json()['keys']
+                    response = requests.request("POST", url, headers=headers, data=payload)
+                    end = datetime.datetime.now()
+                    print("[RECON][Retorno Fullcace] " + response.text)
+                    try:
+                        recon = response.json()['keys']
+                        print("[RECON] Qtd keys" + len(recon))
+
+                        # Chama a contagem para o frame
+                        face_count = self.get_face_count(imgBase64[0], token)
+                        print("[RECON][RESULTADO:] Reconhecidos:" + len(recon) + " - Contagem: " + face_count)
+                    except Exception:
+                        print("[E][RECON] frame_recon.py linhas 164 a 168" + str(sys.exc_info()))
                 except Exception:
-                    print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
+                    print("[E][RECON] frame_recon.py linha 158" + str(sys.exc_info()))
+                imgBase64 = []
 
 
 
@@ -179,7 +188,7 @@ class FrameReconFullFace:
 
         return self.last_token
 
-    def get_people_count(self, img, access_token):
+    def get_face_count(self, imgB64, access_token):
         import requests
         import json
         face_count = 0
@@ -187,7 +196,8 @@ class FrameReconFullFace:
 
         payload = json.dumps({
             "projectName": "a94df8b7-90fd-49ac-9173-1f4da3782c6e",
-            "accessToken": ""
+            "accessToken": access_token,
+            "picture": imgB64
         })
         headers = {
             'Content-Type': 'application/json'
