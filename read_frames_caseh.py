@@ -9,6 +9,13 @@ import time, datetime, sys
 import cv2
 import RPi.GPIO as GPIO
 
+# Define LED de saída
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+# PIN11 = GPIO17
+GPIO.setup(11, GPIO.OUT)
+
+
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
 	dt = str(datetime.datetime.now())
@@ -42,12 +49,6 @@ quit = False
 # start to fill
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
-
-# Define LED de saída
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)
-# PIN11 = GPIO17
-GPIO.setup(11, GPIO.OUT)
 
 queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
