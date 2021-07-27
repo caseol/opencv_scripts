@@ -7,6 +7,7 @@ import argparse
 import imutils
 import time, datetime, sys
 import cv2
+import RPi.GPIO as GPIO
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
@@ -42,6 +43,12 @@ quit = False
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
+# Define LED de saída
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+# PIN11 = GPIO17
+GPIO.setup(11, GPIO.OUT)
+
 queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/').start()
@@ -66,6 +73,12 @@ while vct.running():
 		if (second % 10 == 0):
 			frf.set_frame(frame, video_source)
 			print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+	if frf.recon_status == True:
+		GPIO.output(12, GPIO.HIGH)
+		print("[RECON] LIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+	else:
+		GPIO.output(12, GPIO.LOW)
+		print("[RECON] DESLIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)

@@ -6,8 +6,6 @@ import cv2
 import datetime
 import base64, json
 
-import RPi.GPIO as GPIO
-
 def getBase64(image):
 	with open(image, "rb") as img_file:
 		img64 = base64.b64encode(img_file.read()).decode('utf-8')
@@ -72,12 +70,6 @@ class FrameReconFullFace:
         self.thread = Thread(target=self.recognize, args=())
         self.thread.daemon = True
 
-        # Define LED de saída
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BOARD)
-        # PIN11 = GPIO17
-        GPIO.setup(11, GPIO.OUT)
-
     def start(self):
         # start a thread to read frames from the file video stream
         self.thread.start()
@@ -141,7 +133,7 @@ class FrameReconFullFace:
                 except Exception:
                     print("[E][RECON]" + str(sys.exc_info()))
 
-            if len(imgBase64) >= 4:
+            if len(imgBase64) > 4:
                 url = "http://www.fullfacelab.com/fffacerecognition_NC/autapi/users/authenticate"
                 token = self.get_token()
                 payload = json.dumps({
@@ -158,20 +150,24 @@ class FrameReconFullFace:
                     end = datetime.datetime.now()
                     print("[RECON][Retorno Fullcace] " + response.text)
                     try:
-                        recon = response.json()['keys']
-                        print("[RECON] Qtd keys" + str(len(recon)))
-
-                        # Chama a contagem para o frame
-                        face_count = self.get_face_count(imgBase64[0], token)
-                        print("[RECON][RESULTADO:] Reconhecidos:" + str(len(recon)) + " - Contagem: " + str(face_count))
+                        if 'keys' in response.json():
+                            recon = response.json()['keys']
+                            print("[RECON] Qtd keys" + str(len(recon)))
+                            # Chama a contagem para o frame
+                            face_count = self.get_face_count(imgBase64[0], token)
+                            print("[RECON][RESULTADO:] Reconhecidos:" + str(len(recon)) + " - Contagem: " + str(
+                                face_count))
+                            if (len(recon) == face_count and len(recon) > 0) :
+                                self.recon_status = True
+                            else:
+                                self.recon_status = False
+                        else:
+                            print("[RECON] Nenhum reconhecimento no frame: " + str(len(recon)))
                     except Exception:
                         print("[E][RECON] frame_recon.py linhas 164 a 168" + str(sys.exc_info()))
                 except Exception:
                     print("[E][RECON] frame_recon.py linha 158" + str(sys.exc_info()))
                 imgBase64 = []
-
-
-
 
     def get_token(self):
         if (self.last_token_date == None) or (datetime.datetime.now() - self.last_token_date).total_seconds() > 1190:
