@@ -105,7 +105,7 @@ class FrameReconFullFace:
                     if filename.endswith(".jpg") and len(imgBase64) < 6:
                         imgBase64.append(getBase64(self.path_todo + filename))
                         # imgBase64.append(getBase64("../../recon/cropped/" + filename))
-                        shutil.move(self.path_todo + filename, self.path_done)
+                        shutil.move(self.path_todo + filename, self.path_done + filename)
 
                 except Exception:
                     print("[E]" + str(sys.exc_info()))
@@ -122,7 +122,6 @@ class FrameReconFullFace:
                 headers = {
                     'Content-Type': 'application/json'
                 }
-                GPIO.output(11, GPIO.HIGH)
 
                 response = requests.request("POST", url, headers=headers, data=payload)
                 end = datetime.datetime.now()
