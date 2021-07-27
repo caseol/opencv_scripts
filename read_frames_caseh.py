@@ -61,12 +61,6 @@ if record_video == 'True':
 
 # loop over frames from the video file stream
 while vct.running():
-	# Define LED de saída
-	GPIO.setwarnings(False)
-	GPIO.setmode(GPIO.BOARD)
-	# PIN11 = GPIO17
-	GPIO.setup(11, GPIO.OUT)
-
 	frame = vct.read()
 	# show the frame and update the FPS counter
 	if show_video == 'True':
@@ -81,10 +75,10 @@ while vct.running():
 			frf.set_frame(frame, video_source)
 			print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	if frf.recon_status == True:
-		GPIO.output(12, GPIO.HIGH)
+		GPIO.output(11, GPIO.HIGH)
 		print("[RECON] LIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
-		GPIO.output(12, GPIO.LOW)
+		GPIO.output(11, GPIO.LOW)
 		print("[RECON] DESLIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 	# Press Q on keyboard to stop recording
