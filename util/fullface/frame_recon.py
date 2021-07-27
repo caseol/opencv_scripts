@@ -106,6 +106,7 @@ class FrameReconFullFace:
                         imgBase64.append(getBase64(self.path_todo + filename))
                         # imgBase64.append(getBase64("../../recon/cropped/" + filename))
                         shutil.move(self.path_todo + filename, self.path_done + filename)
+                        print("[RECON] Movendo de: " + (self.path_todo + filename) + " para: " + (self.path_done + filename))
 
                 except Exception:
                     print("[E]" + str(sys.exc_info()))
