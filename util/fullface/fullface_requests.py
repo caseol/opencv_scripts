@@ -1,11 +1,42 @@
 import os, sys, requests, base64, shutil, datetime
-import json
+import json, cv2
 
 
 def getBase64(image):
     with open(image, "rb") as img_file:
         img64 = base64.b64encode(img_file.read()).decode('utf-8')
     return img64
+
+def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation = inter)
+
+    # return the resized image
+    return resized
 
 imgBase64 = []
 count = 0
@@ -21,10 +52,10 @@ access_token = response.json()['access_token']
 
 start = datetime.datetime.now()
 #for filename in os.listdir("../../recon/cropped"):
-for filename in os.listdir("../../recon/to_create/nathalia"):
+for filename in os.listdir("../../recon/to_create/nathalia/boas"):
     try:
         if filename.endswith(".jpg"):
-            imgBase64.append(getBase64("../../recon/to_create/nathalia" + filename))
+            imgBase64.append(getBase64(image_resize(height=480)))
             #imgBase64.append(getBase64("../../recon/cropped/" + filename))
             #shutil.move("../../recon/done/" + filename, "../../recon/processed/")
             #count = count + 1
@@ -55,9 +86,6 @@ headers = {
 response = requests.request("POST", url, headers=headers, data=payload)
 
 print(response.text)
-
-response.json()
-
 
 response = requests.request("POST", url, headers=headers, data=payload, verify=False)
 end = datetime.datetime.now()

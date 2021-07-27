@@ -13,9 +13,39 @@ def getBase64(image):
 		img64 = base64.b64encode(img_file.read()).decode('utf-8')
 	return img64
 
+def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation = inter)
+
+    # return the resized image
+    return resized
 
 class FrameReconFullFace:
-    def __init__(self, path_todo='recon/todo/', path_cropped='recon/cropped/', path_not_cropped='recon/not_cropped/' , path_done='recon/done/'):
+    def __init__(self, path_todo='recon/todo/', path_cropped='recon/cropped/',  path_not_cropped='recon/not_cropped/' , path_done='recon/done/'):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
         self.stopped = False
@@ -48,12 +78,10 @@ class FrameReconFullFace:
         # PIN11 = GPIO17
         GPIO.setup(11, GPIO.OUT)
 
-
     def start(self):
         # start a thread to read frames from the file video stream
         self.thread.start()
         return self
-
 
     def set_frame(self, frame, video_source):
         self.frame = frame
@@ -62,6 +90,7 @@ class FrameReconFullFace:
     def recognize(self):
         # keep looping infinitely
         imgBase64 = []
+        recon = None
         while True:
             # verifica se existem frames para croppar
             if self.frame is not None:
@@ -103,13 +132,14 @@ class FrameReconFullFace:
             for filename in os.listdir(self.path_todo):
                 try:
                     if filename.endswith(".jpg") and len(imgBase64) < 6:
+                        # redimenciona antes de
                         imgBase64.append(getBase64(self.path_todo + filename))
                         # imgBase64.append(getBase64("../../recon/cropped/" + filename))
                         shutil.move(self.path_todo + filename, self.path_done + filename)
                         print("[RECON] Movendo de: " + (self.path_todo + filename) + " para: " + (self.path_done + filename))
 
                 except Exception:
-                    print("[E]" + str(sys.exc_info()))
+                    print("[E][RECON]" + str(sys.exc_info()))
 
             if len(imgBase64) >= 4:
                 url = "http://www.fullfacelab.com/fffacerecognition_NC/autapi/users/authenticate"
@@ -126,7 +156,14 @@ class FrameReconFullFace:
 
                 response = requests.request("POST", url, headers=headers, data=payload)
                 end = datetime.datetime.now()
-                print(response.text)
+                print("[RECON][Retorno Fullcace] " + response.text)
+                try:
+                    recon = response.json()['keys']
+                except Exception:
+                    print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
+
+
+
 
     def get_token(self):
         if (self.last_token_date == None) or (datetime.datetime.now() - self.last_token_date).total_seconds() > 1190:
@@ -141,6 +178,28 @@ class FrameReconFullFace:
             self.last_token = response.json()['access_token']
 
         return self.last_token
+
+    def get_people_count(self, img, access_token):
+        import requests
+        import json
+        face_count = 0
+        url = "http://fullfacelab.com/fffacerecognition_nc/qtdapi/users/faceCount"
+
+        payload = json.dumps({
+            "projectName": "a94df8b7-90fd-49ac-9173-1f4da3782c6e",
+            "accessToken": ""
+        })
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+        try:
+            face_count = response.json()['access_token']
+        except Exception:
+            print("[E][COUNT_PEOPLE]" + str(sys.exc_info()))
+
+        return face_count
 
     # Insufficient to have consumer use while(more()) which does
     # not take into account if the producer has reached end of
