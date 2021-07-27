@@ -92,7 +92,6 @@ class FrameReconFullFace:
         imgBase64 = []
         recon = None
         while True:
-            imgBase64 = []
             # verifica se existem frames para croppar
             if self.frame is not None:
                 # inicia a data de recebimento do frame
