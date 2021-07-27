@@ -160,11 +160,11 @@ class FrameReconFullFace:
                     print("[RECON][Retorno Fullcace] " + response.text)
                     try:
                         recon = response.json()['keys']
-                        print("[RECON] Qtd keys" + len(recon))
+                        print("[RECON] Qtd keys" + str(len(recon)))
 
                         # Chama a contagem para o frame
                         face_count = self.get_face_count(imgBase64[0], token)
-                        print("[RECON][RESULTADO:] Reconhecidos:" + len(recon) + " - Contagem: " + face_count)
+                        print("[RECON][RESULTADO:] Reconhecidos:" + str(len(recon)) + " - Contagem: " + str(face_count))
                     except Exception:
                         print("[E][RECON] frame_recon.py linhas 164 a 168" + str(sys.exc_info()))
                 except Exception:
