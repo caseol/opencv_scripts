@@ -88,10 +88,8 @@ class FrameReconFullFace:
     def recognize(self):
         # keep looping infinitely
         imgBase64 = []
-        recon = None
         self.insuficient_files_status = False
         while True:
-
             # verifica se existem frames para croppar
             if self.frame is not None:
                 # inicia a data de recebimento do frame
@@ -194,6 +192,10 @@ class FrameReconFullFace:
                 if self.recon_status == False and self.recon_retry < 3:
                     self.recon_retry = self.recon_retry + 1
                     self.recon_status = True
+                    print("[RECON][RETENTATIVA] : " + str(self.recon_retry))
+                elif self.recon_status == False and self.recon_retry >= 3:
+                    self.recon_retry = self.recon_retry + 1
+                    # mantem o status false e cresce o num de retentativas
                     print("[RECON][RETENTATIVA] : " + str(self.recon_retry))
                 else:
                     self.recon_retry = 0
