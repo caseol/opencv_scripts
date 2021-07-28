@@ -67,8 +67,10 @@ while vct.running():
 	frame = vct.read()
 	# show the frame and update the FPS counter
 	if show_video == 'True':
-		#cv2.imshow(video_source, frame)
-		vrt.show_frame()
+		if record_video == 'True':
+			vrt.show_frame()
+		else:
+			cv2.imshow(video_source, frame)
 
 	if True:
 		dtn = datetime.datetime.now()
@@ -98,6 +100,7 @@ while vct.running():
 	if vct.Q.qsize() < 2:  # If we are low on frames, give time to producer
 		time.sleep(0.001)  # Ensures producer runs now, so 2 is sufficient
 	fps.update()
+	frame = None
 
 # stop the timer and display FPS information
 fps.stop()
