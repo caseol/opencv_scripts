@@ -189,6 +189,13 @@ class FrameReconFullFace:
                 except Exception:
                     print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
                     self.recon_status = False
+                if self.recon_status == False and self.recon_retry < 3:
+                    self.recon_retry =+ 1
+                    self.recon_status = True
+                    print("[RECON][RETENTATIVA] : " + str(self.recon_retry))
+                else:
+                    self.recon_retry = 0
+
                 imgBase64 = []
             else:
                 if insuficient_files_status != True:

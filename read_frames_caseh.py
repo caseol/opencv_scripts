@@ -80,16 +80,25 @@ while vct.running():
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
 
-	if frf.recon_status == True:
+	# verifica se o num de retentativas de identificação é maior 0
+	# se for começa a piscar o led
+	if frf.recon_retry > 0:
 		GPIO.output(11, GPIO.HIGH)
-		if led_current_status != True:
-			print("[RECON] LIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-			led_current_status = True
-	else:
+		time.sleep(0.5)
 		GPIO.output(11, GPIO.LOW)
-		if led_current_status != False:
-			print("[RECON] DESLIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-			led_current_status = False
+		time.sleep(0.5)
+	else:
+		# Se não estiver dentro das retentativas coloca o estado atual
+		if frf.recon_status == True:
+			GPIO.output(11, GPIO.HIGH)
+			if led_current_status != True:
+				print("[RECON] LIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+				led_current_status = True
+		else:
+			GPIO.output(11, GPIO.LOW)
+			if led_current_status != False:
+				print("[RECON] DESLIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+				led_current_status = False
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
@@ -111,4 +120,6 @@ print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 cv2.destroyAllWindows()
 vct.stop()
 frf.stop()
+# deliga LED
+GPIO.output(11, GPIO.LOW)
 exit(1)
