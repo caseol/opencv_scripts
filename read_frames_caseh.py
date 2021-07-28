@@ -42,7 +42,7 @@ video_source = args["video"]
 show_video = args["show"]
 record_video = args["record"]
 fps_to_video = args["fps"]
-recon = args["recon_faces"]
+recon_faces = args["recon_faces"]
 last_minute = -1
 
 quit = False
@@ -56,7 +56,8 @@ led_current_status = False
 
 queue = Queue(maxsize=128)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
-frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/').start()
+if recon_faces:
+	frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/').start()
 fps = FPS().start()
 
 vrt = None
@@ -72,11 +73,11 @@ while vct.running():
 		else:
 			cv2.imshow(video_source, frame)
 
-	if True:
+	if recon_faces:
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
-		if (second % 10 == 0):
+		if (second % 10 == 0) or frf.insuficient_files_status:
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
 

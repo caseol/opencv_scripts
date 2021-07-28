@@ -89,7 +89,7 @@ class FrameReconFullFace:
         # keep looping infinitely
         imgBase64 = []
         recon = None
-        insuficient_files_status = True
+        self.insuficient_files_status = False
         while True:
 
             # verifica se existem frames para croppar
@@ -145,7 +145,7 @@ class FrameReconFullFace:
 
             if len(imgBase64) > 4:
                 print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-                insuficient_files_status = False
+                self.insuficient_files_status = False
 
                 url = "http://www.fullfacelab.com/fffacerecognition_NC/autapi/users/authenticate"
                 token = self.get_token()
@@ -200,9 +200,9 @@ class FrameReconFullFace:
 
                 imgBase64 = []
             else:
-                if insuficient_files_status != True:
+                if self.insuficient_files_status != True:
                     print("[RECON] Qtd insuficiente para chamar reconhecimento. STATUS ATUAL: " + str(self.recon_status))
-                    insuficient_files_status = True
+                    self.insuficient_files_status = True
 
     def get_token(self):
         if (self.last_token_date == None) or (datetime.datetime.now() - self.last_token_date).total_seconds() > 1190:
