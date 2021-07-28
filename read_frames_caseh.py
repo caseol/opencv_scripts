@@ -5,7 +5,7 @@ from queue import Queue
 from imutils.video import FPS
 import argparse
 import imutils
-import time, datetime, sys
+import time, datetime, logging
 import cv2
 import RPi.GPIO as GPIO
 
@@ -14,7 +14,6 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 # PIN11 = GPIO17
 GPIO.setup(11, GPIO.OUT)
-
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
@@ -50,6 +49,9 @@ quit = False
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
+# variavel para guardar status corrente do LED:
+led_current_status = False
+
 queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/').start()
@@ -58,7 +60,6 @@ fps = FPS().start()
 vrt = None
 if record_video == 'True':
 	vrt = VideoRecordThread(video_source, queue).start()
-
 # loop over frames from the video file stream
 while vct.running():
 	frame = vct.read()
@@ -72,14 +73,19 @@ while vct.running():
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
 		if (second % 10 == 0):
+			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
-			print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+
 	if frf.recon_status == True:
-		GPIO.output(11, GPIO.HIGH)
-		print("[RECON] LIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+		#GPIO.output(11, GPIO.HIGH)
+		if led_current_status != True:
+			print("[RECON] LIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+			led_current_status = True
 	else:
-		GPIO.output(11, GPIO.LOW)
-		print("[RECON] DESLIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+		#GPIO.output(11, GPIO.LOW)
+		if led_current_status != False:
+			print("[RECON] DESLIGA LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+			led_current_status = False
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)

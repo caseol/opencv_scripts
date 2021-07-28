@@ -1,17 +1,21 @@
 # import the necessary packages
 from util.face_cropper import FaceCropper
 from threading import Thread
+from collections import Counter
+
 import requests, sys, os, shutil
 import cv2
 import datetime
 import base64, json
 
-def getBase64(image):
-	with open(image, "rb") as img_file:
-		img64 = base64.b64encode(img_file.read()).decode('utf-8')
-	return img64
 
-def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+def getBase64(image):
+    with open(image, "rb") as img_file:
+        img64 = base64.b64encode(img_file.read()).decode('utf-8')
+    return img64
+
+
+def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
     # grab the image size
     dim = None
@@ -37,13 +41,15 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
         dim = (width, int(h * r))
 
     # resize the image
-    resized = cv2.resize(image, dim, interpolation = inter)
+    resized = cv2.resize(image, dim, interpolation=inter)
 
     # return the resized image
     return resized
 
+
 class FrameReconFullFace:
-    def __init__(self, path_todo='recon/todo/', path_cropped='recon/cropped/',  path_not_cropped='recon/not_cropped/' , path_done='recon/done/'):
+    def __init__(self, path_todo='recon/todo/', path_cropped='recon/cropped/', path_not_cropped='recon/not_cropped/',
+                 path_done='recon/done/'):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
         self.stopped = False
@@ -83,13 +89,16 @@ class FrameReconFullFace:
         # keep looping infinitely
         imgBase64 = []
         recon = None
+        insuficient_files_status = True
         while True:
+
             # verifica se existem frames para croppar
             if self.frame is not None:
                 # inicia a data de recebimento do frame
                 dtn = datetime.datetime.now()
                 # monta o caminho para gravar o frame em todo
-                to_recon_todo = self.path_todo + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M_%S_%f') + ".jpg"
+                to_recon_todo = self.path_todo + self.video_source.split('/')[-1] + "_" + dtn.strftime(
+                    '%Y-%m-%d_%H_%M_%S_%f') + ".jpg"
                 # grava o frame como arquivo
                 cv2.imwrite(to_recon_todo, self.frame)
                 print("[RECON] Frame saved at todo: " + to_recon_todo)
@@ -117,23 +126,27 @@ class FrameReconFullFace:
                                 print("[CROPPER] Sem arquivos em: " + self.path_todo)
                             continue
                         except Exception:
-                            print("[CROPPER] Deu merda! " +  str(sys.exc_info()))
+                            print("[CROPPER] Deu merda! " + str(sys.exc_info()))
                 self.frame = None
 
             # pega ao menos 6 dos frame original (not cropped), transforma para Base64
             for filename in os.listdir(self.path_todo):
                 try:
-                    if filename.endswith(".jpg") and len(imgBase64) < 6:
+                    if filename.endswith(".jpg") and len(imgBase64) <= 6:
                         # redimenciona antes de
                         imgBase64.append(getBase64(self.path_todo + filename))
                         # imgBase64.append(getBase64("../../recon/cropped/" + filename))
                         shutil.move(self.path_todo + filename, self.path_done + filename)
-                        print("[RECON] Movendo de: " + (self.path_todo + filename) + " para: " + (self.path_done + filename))
+                        print("[RECON] Movendo de: " + (self.path_todo + filename) + " para: " + (
+                                    self.path_done + filename))
 
                 except Exception:
                     print("[E][RECON]" + str(sys.exc_info()))
 
             if len(imgBase64) > 4:
+                print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+                insuficient_files_status = False
+
                 url = "http://www.fullfacelab.com/fffacerecognition_NC/autapi/users/authenticate"
                 token = self.get_token()
                 payload = json.dumps({
@@ -147,27 +160,40 @@ class FrameReconFullFace:
                 }
                 try:
                     response = requests.request("POST", url, headers=headers, data=payload)
-                    end = datetime.datetime.now()
-                    print("[RECON][Retorno Fullcace] " + response.text)
+                    end_autenticate = datetime.datetime.now()
+                    print("[RECON][Retorno Fullcace] Tempo: " + str((end_autenticate - dtn).total_seconds()))
+                    print("[RECON][Retorno Fullcace] Resposta: " + response.text)
                     try:
                         if 'keys' in response.json():
+                            # retorna uma lista (array) com pares de hash
                             recon = response.json()['keys']
-                            print("[RECON] Qtd keys" + str(len(recon)))
+                            # verifica se para cada item da lista a qtd de key cujo valor é 'nome'
+                            recon_count = 0
+                            for hash in recon:
+                                recon_count = recon_count + len([k for k, v in hash.items() if v == 'nome'])
+                            print("[RECON] Qtd keys 'nome' retornadas pela Fullface" + str(recon_count))
                             # Chama a contagem para o frame
                             face_count = self.get_face_count(imgBase64[0], token)
-                            print("[RECON][RESULTADO:] Reconhecidos:" + str(len(recon)) + " - Contagem: " + str(
-                                face_count))
-                            if (len(recon) == face_count and len(recon) > 0) :
+                            print("[RECON][RESULTADO:] Reconhecidos:" + str(recon_count) + " - Contagem: " + str(face_count))
+                            if (recon_count == face_count):
                                 self.recon_status = True
                             else:
                                 self.recon_status = False
-                        else:
                             print("[RECON] Nenhum reconhecimento no frame: " + str(len(recon)))
+                        else:
+                            print("[RECON][RESULTADO:]: " + str(self.recon_status))
+                            self.recon_status = False
                     except Exception:
-                        print("[E][RECON] frame_recon.py linhas 164 a 168" + str(sys.exc_info()))
+                        print("[E][RECON] frame_recon.py linhas 167 a 185" + str(sys.exc_info()))
+                        self.recon_status = False
                 except Exception:
-                    print("[E][RECON] frame_recon.py linha 158" + str(sys.exc_info()))
+                    print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
+                    self.recon_status = False
                 imgBase64 = []
+            else:
+                if insuficient_files_status != True:
+                    print("[RECON] Qtd insuficiente para chamar reconhecimento. STATUS ATUAL: " + str(self.recon_status))
+                    insuficient_files_status = True
 
     def get_token(self):
         if (self.last_token_date == None) or (datetime.datetime.now() - self.last_token_date).total_seconds() > 1190:
@@ -198,9 +224,9 @@ class FrameReconFullFace:
             'Content-Type': 'application/json'
         }
 
-        response = requests.request("POST", url, headers=headers, data=payload)
         try:
-            face_count = response.json()['access_token']
+            response = requests.request("POST", url, headers=headers, data=payload)
+            face_count = response.json()['faceCount']
         except Exception:
             print("[E][COUNT_PEOPLE]" + str(sys.exc_info()))
 

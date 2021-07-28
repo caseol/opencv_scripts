@@ -1,11 +1,25 @@
 import os, sys, requests, base64, shutil, datetime
 import json, cv2
+import argparse
+import imutils
 
 
 def getBase64(image):
-    with open(image, "rb") as img_file:
-        img64 = base64.b64encode(img_file.read()).decode('utf-8')
-    return img64
+    # lê imagem
+    img = cv2.imread(image)
+    # pega o formato
+    height, width, channels = img.shape
+    #verifica se altura é maior que largura para que o resize seja menor pela largura
+    if height > width:
+        img = imutils.resize(img, width=480)
+    else:
+        # verifica se largura é maior que altura
+        img = imutils.resize(img, height=480)
+
+    _, img_arr = cv2.imencode('.jpg', img)  # im_arr: image como Numpy one-dim array format.
+    im_bytes = img_arr.tobytes()
+    im_b64 = base64.b64encode(im_bytes).decode('utf-8')
+    return im_b64
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
@@ -38,6 +52,21 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # return the resized image
     return resized
 
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-c", "--cadastro", required=False,
+	help="Faz o cadastro de uma face na Fullface")
+ap.add_argument("-a", "--atualizar", required=False,
+	help="show video window")
+ap.add_argument("-r", "--record", required=False,
+	help="save video output")
+ap.add_argument("-f", "--fps", required=True,
+	help="define FPS")
+ap.add_argument("-rf", "--recon_faces", required=False,
+	help="active face recognition")
+args = vars(ap.parse_args())
+
+
 imgBase64 = []
 count = 0
 
@@ -55,7 +84,7 @@ start = datetime.datetime.now()
 for filename in os.listdir("../../recon/to_create/nathalia/boas"):
     try:
         if filename.endswith(".jpg"):
-            imgBase64.append(getBase64(image_resize(height=480)))
+            imgBase64.append(getBase64("../../recon/to_create/nathalia/boas/" + filename))
             #imgBase64.append(getBase64("../../recon/cropped/" + filename))
             #shutil.move("../../recon/done/" + filename, "../../recon/processed/")
             #count = count + 1
@@ -86,8 +115,6 @@ headers = {
 response = requests.request("POST", url, headers=headers, data=payload)
 
 print(response.text)
-
-response = requests.request("POST", url, headers=headers, data=payload, verify=False)
 end = datetime.datetime.now()
 print(response.text)
 print(str((end - start).total_seconds()))
