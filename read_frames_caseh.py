@@ -84,10 +84,16 @@ while vct.running():
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led
 		if frf.recon_retry > 0 and frf.recon_retry <= 3:
-			GPIO.output(11, GPIO.HIGH)
-			time.sleep(0.5)
-			GPIO.output(11, GPIO.LOW)
-			time.sleep(0.5)
+			if frf.recon_retry == 3:
+				GPIO.output(11, GPIO.HIGH)
+				time.sleep(0.3)
+				GPIO.output(11, GPIO.LOW)
+				time.sleep(0.3)
+			else:
+				GPIO.output(11, GPIO.HIGH)
+				time.sleep(0.5)
+				GPIO.output(11, GPIO.LOW)
+				time.sleep(0.5)
 			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
 			# Se não estiver dentro das retentativas coloca o estado atual
