@@ -171,7 +171,9 @@ class FrameReconFullFace:
                             recon_count = 0
                             for hash in recon:
                                 recon_count = recon_count + len([k for k, v in hash.items() if v == 'nome'])
+
                             print("[RECON] Qtd keys 'nome' retornadas pela Fullface: " + str(recon_count))
+
                             # Chama a contagem para o frame
                             face_count = self.get_face_count(imgBase64[0], token)
                             print("[RECON][RESULTADO:] Reconhecidos:" + str(recon_count) + " - Contagem: " + str(face_count))
@@ -179,7 +181,7 @@ class FrameReconFullFace:
                                 self.recon_status = True
                             else:
                                 self.recon_status = False
-                            print("[RECON] Nenhum reconhecimento no frame: " + str(len(recon)))
+                                print("[RECON] Nenhum reconhecimento no frame: " + str(len(recon)))
                         else:
                             print("[RECON][RESULTADO:]: " + str(self.recon_status))
                             self.recon_status = False
@@ -190,7 +192,7 @@ class FrameReconFullFace:
                     print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
                     self.recon_status = False
                 if self.recon_status == False and self.recon_retry < 3:
-                    self.recon_retry =+ 1
+                    self.recon_retry = self.recon_retry + 1
                     self.recon_status = True
                     print("[RECON][RETENTATIVA] : " + str(self.recon_retry))
                 else:
