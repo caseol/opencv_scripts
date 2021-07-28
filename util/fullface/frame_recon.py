@@ -171,7 +171,7 @@ class FrameReconFullFace:
                             recon_count = 0
                             for hash in recon:
                                 recon_count = recon_count + len([k for k, v in hash.items() if v == 'nome'])
-                            print("[RECON] Qtd keys 'nome' retornadas pela Fullface" + str(recon_count))
+                            print("[RECON] Qtd keys 'nome' retornadas pela Fullface: " + str(recon_count))
                             # Chama a contagem para o frame
                             face_count = self.get_face_count(imgBase64[0], token)
                             print("[RECON][RESULTADO:] Reconhecidos:" + str(recon_count) + " - Contagem: " + str(face_count))
