@@ -14,6 +14,8 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
 # PIN11 = GPIO17
 GPIO.setup(11, GPIO.OUT)
+# inicia com LED desligado
+GPIO.output(11, GPIO.LOW)
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
