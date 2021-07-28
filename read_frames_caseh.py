@@ -83,7 +83,7 @@ while vct.running():
 
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led
-		if frf.recon_retry > 0 and frf.recon_retry < 3:
+		if frf.recon_retry > 0 and frf.recon_retry <= 3:
 			GPIO.output(11, GPIO.HIGH)
 			time.sleep(0.5)
 			GPIO.output(11, GPIO.LOW)
