@@ -7,13 +7,13 @@ import argparse
 import imutils
 import time, datetime, logging
 import cv2
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 # Define LED de saída
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)
+#GPIO.setwarnings(False)
+#GPIO.setmode(GPIO.BOARD)
 # PIN11 = GPIO17
-GPIO.setup(11, GPIO.OUT)
+#GPIO.setup(11, GPIO.OUT)
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
