@@ -54,7 +54,7 @@ print("[INFO] starting video thread from: " + video_source)
 # variavel para guardar status corrente do LED:
 led_current_status = False
 
-queue = Queue(maxsize=128)
+queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 if recon_faces:
 	frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/').start()

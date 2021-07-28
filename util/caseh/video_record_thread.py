@@ -3,7 +3,7 @@ import cv2, time, datetime
 
 
 class VideoRecordThread(object):
-    def __init__(self, source, queue, fps=12):
+    def __init__(self, source, queue, fps=30):
         # flag control
         self.stopped = False
         self.Q = queue
@@ -57,7 +57,7 @@ class VideoRecordThread(object):
                 self.output_video.write(self.frame)
             else:
                 print("[INFO] fila cheia! dando tempo para o worker trabalhar..." + self.output_path)
-                time.sleep(0.1)  # Rest for 10ms, we have a full queue
+                time.sleep(0.2)  # Rest for 10ms, we have a full queue
 
         print("[INFO] Fim da gravação" + self.output_path)
 
