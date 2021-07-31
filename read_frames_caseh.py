@@ -26,14 +26,18 @@ def timestampFrame(fr):
 
 def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
-		if int(retry_num) >= int(float(max_retry) * 0.75):
+		if int(retry_num) >= int(float(max_retry) * 0.85):
 			led_red.blink(0.25, 0.25)
 			led_green.off()
-			print("[RECON] PISCAR LED RAPIDO - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-		else:
+			print("[RECON] PISCAR LED 0.25 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+		elif int(retry_num) >= int(float(max_retry) * 0.55):
 			led_red.blink(0.5, 0.5)
+			led_green.off()
+			print("[RECON] PISCAR LED 0.5 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+		else:
+			led_red.blink(0.75, 0.75)
 			led_green.on()
-			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+			print("[RECON] PISCAR LED 0.75 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
 		if frf.recon_status == True:
@@ -52,9 +56,9 @@ def control_led(retry_num, max_retry, led_current_status):
 
 def check_buttons():
 	if btn_main.is_pressed:
-		led_red.on()
+		print("[BUTTON] BTN_MAIN - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	if btn_aux.is_pressed:
-		led_red.blink(0.5, 0.5)
+		print("[BUTTON] BTN_AUX - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 
 # Liga teste dos LEDs
@@ -126,8 +130,8 @@ while vct.running():
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
 
-		print("[RECON] Condiçoes 1 RECON: (diff_from_last_recon > int(recon_period) " + str(diff_from_last_recon > int(recon_period)))
-		print("[RECON] Condiçoes 2 RECON: (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry) " + str((frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry))))
+		# print("[RECON] Condiçoes 1 RECON: (diff_from_last_recon > int(recon_period) " + str(diff_from_last_recon > int(recon_period)))
+		# print("[RECON] Condiçoes 2 RECON: (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry) " + str((frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry))))
 		if (diff_from_last_recon > int(recon_period)) or (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)

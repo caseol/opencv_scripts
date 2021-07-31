@@ -197,13 +197,15 @@ class FrameReconFullFace:
                 if self.recon_status == False and self.recon_retry < self.max_retry:
                     self.recon_retry = self.recon_retry + 1
                     self.recon_status = True
-                    #print("[RECON][RETENTATIVA] : " + str(self.recon_retry)+ "/"  + str(self.recon_retry))
+                    print("[RECON][RETENTATIVA] Status OK : " + str(self.recon_retry)+ "/"  + str(self.max_retry))
                 elif self.recon_status == False and self.recon_retry >= self.max_retry:
                     self.recon_retry = self.recon_retry + 1
                     # mantem o status false e cresce o num de retentativas
-                    #print("[RECON][RETENTATIVA] : " + str(self.recon_retry) + "/" + str(self.recon_retry))
+                    print("[RECON][RETENTATIVA]  Status NOK: " + str(self.recon_retry) + "/" + str(self.max_retry))
                 else:
                     self.recon_retry = 0
+                    print("[RECON][RETENTATIVA][ZERADO]: " + str(self.recon_retry) + "/" + str(self.max_retry))
+
 
                 imgBase64 = []
             else:
