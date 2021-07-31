@@ -183,7 +183,7 @@ class FrameReconFullFace:
                                 self.last_recon_datetime = datetime.datetime.now()
                             else:
                                 self.recon_status = False
-                                print("[RECON] Nenhum reconhecimento no frame: " + str(len(recon)))
+                                print("[RECON] Nenhum reconhecimento no frame: " + str(recon_count))
                         else:
                             print("[RECON][RESULTADO:]: " + str(self.recon_status))
                             self.recon_status = False
@@ -197,18 +197,18 @@ class FrameReconFullFace:
                 if self.recon_status == False and self.recon_retry < self.max_retry:
                     self.recon_retry = self.recon_retry + 1
                     self.recon_status = True
-                    print("[RECON][RETENTATIVA] : " + str(self.recon_retry)+ "/"  + str(self.recon_retry))
+                    #print("[RECON][RETENTATIVA] : " + str(self.recon_retry)+ "/"  + str(self.recon_retry))
                 elif self.recon_status == False and self.recon_retry >= self.max_retry:
                     self.recon_retry = self.recon_retry + 1
                     # mantem o status false e cresce o num de retentativas
-                    print("[RECON][RETENTATIVA] : " + str(self.recon_retry) + "/" + str(self.recon_retry))
+                    #print("[RECON][RETENTATIVA] : " + str(self.recon_retry) + "/" + str(self.recon_retry))
                 else:
                     self.recon_retry = 0
 
                 imgBase64 = []
             else:
                 if self.insuficient_files_status != True:
-                    print("[RECON] Qtd insuficiente para chamar reconhecimento. STATUS ATUAL: " + str(self.recon_status))
+                    print("[RECON] Sem imagens para reconhecimento. STATUS ATUAL: " + str(self.recon_status))
                     self.insuficient_files_status = True
 
     def get_token(self):

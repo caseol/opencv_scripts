@@ -13,6 +13,7 @@ import cv2
 # PIN11 = GPIO17
 led_green = LED(17)
 led_red = LED(27)
+
 btn_main = Button(22)
 btn_aux = Button(23)
 
@@ -25,13 +26,13 @@ def timestampFrame(fr):
 
 def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
-		if int(retry_num) >= int(float(max_retry) * 0.7):
+		if int(retry_num) >= int(float(max_retry) * 0.75):
 			led_red.blink(0.25, 0.25)
 			led_green.off
 			print("[RECON] PISCAR LED RAPIDO - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
-			led_red.blink(0.5, 0.25)
-			led_green.on()
+			led_red.off()
+			led_green.blink(0.5, 0.5)
 			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
@@ -125,9 +126,12 @@ while vct.running():
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
 
-		if (diff_from_last_recon > int(recon_period)) or (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
-			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-			frf.set_frame(frame, video_source)
+		if (diff_from_last_recon > int(recon_period)):
+			if (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
+				print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+				frf.set_frame(frame, video_source)
+			else:
+				print("[RECON] RETENTATIVA: " + str(frf.recon_retry))
 		else:
 			print("[RECON] OFF - ESTADO RECONHECIDO")
 
@@ -137,7 +141,7 @@ while vct.running():
 
 	# verifica botoes
 	check_buttons()
-	
+
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q') or quit == True:
