@@ -51,9 +51,7 @@ class VideoCaptureThread:
             if not self.Q.full():
                 # read the next frame from the file
                 (grabbed, frame) = self.stream.read()
-
-                (h, w, c) = frame.shape[:3]
-
+                
                 # display the image width, height, and number of channels to our
                 # terminal
                 # print("width: {} pixels".format(frame.shape[1]))
