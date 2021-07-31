@@ -28,11 +28,11 @@ def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
 		if int(retry_num) >= int(float(max_retry) * 0.75):
 			led_red.blink(0.25, 0.25)
-			led_green.off
+			led_green.off()
 			print("[RECON] PISCAR LED RAPIDO - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
-			led_red.off()
-			led_green.blink(0.5, 0.5)
+			led_red.blink(0.5, 0.5)
+			led_green.on()
 			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
@@ -126,11 +126,11 @@ while vct.running():
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
 
+		print("[RECON] Condiçoes 1 RECON: (diff_from_last_recon > int(recon_period) " + str(diff_from_last_recon > int(recon_period)))
+		print("[RECON] Condiçoes 2 RECON: (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry) " + str((frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry))))
 		if (diff_from_last_recon > int(recon_period)) or (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
-		else:
-			print("[RECON] RETENTATIVA: " + str(frf.recon_retry))
 
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led
@@ -142,6 +142,8 @@ while vct.running():
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q') or quit == True:
+		led_green.off()
+		led_red.off()
 		cv2.destroyAllWindows()
 		break
 
