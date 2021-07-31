@@ -126,14 +126,11 @@ while vct.running():
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
 
-		if (diff_from_last_recon > int(recon_period)):
-			if (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
-				print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-				frf.set_frame(frame, video_source)
-			else:
-				print("[RECON] RETENTATIVA: " + str(frf.recon_retry))
+		if (diff_from_last_recon > int(recon_period)) or (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
+			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+			frf.set_frame(frame, video_source)
 		else:
-			print("[RECON] OFF - ESTADO RECONHECIDO")
+			print("[RECON] RETENTATIVA: " + str(frf.recon_retry))
 
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led
