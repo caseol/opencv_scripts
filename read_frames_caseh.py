@@ -117,7 +117,7 @@ while vct.running():
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
-		if ((dtn - frf.last_recon_datetime).total_seconds() > recon_period) or frf.insuficient_files_status:
+		if (int(dtn - frf.last_recon_datetime).total_seconds() > recon_period) or frf.insuficient_files_status:
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
 
