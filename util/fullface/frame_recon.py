@@ -88,7 +88,7 @@ class FrameReconFullFace:
     def recognize(self):
         # keep looping infinitely
         imgBase64 = []
-        self.insuficient_files_status = False
+        self.insuficient_files_status = True
         while True:
             # verifica se existem frames para croppar
             if self.frame is not None:

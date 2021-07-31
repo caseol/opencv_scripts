@@ -7,15 +7,15 @@ import argparse
 import imutils
 import time, datetime, logging
 import cv2
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 # Define LED de saída
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)
+#GPIO.setwarnings(False)
+#GPIO.setmode(GPIO.BOARD)
 # PIN11 = GPIO17
-GPIO.setup(11, GPIO.OUT)
+#GPIO.setup(11, GPIO.OUT)
 # inicia com LED desligado
-GPIO.output(11, GPIO.LOW)
+#GPIO.output(11, GPIO.LOW)
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
@@ -23,6 +23,33 @@ def timestampFrame(fr):
 	cv2.putText(fr, dt, (390, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
 	return fr
+
+def control_led(retry_num, max_retry, led_current_status):
+	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
+		if int(retry_num) >= int(float(max_retry) * 0.8):
+			#GPIO.output(11, GPIO.HIGH)
+			time.sleep(0.25)
+			#GPIO.output(11, GPIO.LOW)
+			time.sleep(0.25)
+		else:
+			#GPIO.output(11, GPIO.HIGH)
+			time.sleep(0.5)
+			#GPIO.output(11, GPIO.LOW)
+			time.sleep(0.5)
+		print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+	else:
+		# Se não estiver dentro das retentativas coloca o estado atual
+		if frf.recon_status == True:
+			#GPIO.output(11, GPIO.HIGH)
+			if led_current_status != True:
+				print("[RECON] LIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+				led_current_status = True
+		else:
+			#GPIO.output(11, GPIO.LOW)
+			if led_current_status != False:
+				print("[RECON] DESLIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+				led_current_status = False
+	return led_current_status
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -36,6 +63,11 @@ ap.add_argument("-f", "--fps", required=True,
 	help="define FPS")
 ap.add_argument("-rf", "--recon_faces", required=False,
 	help="active face recognition")
+ap.add_argument("-rr", "--recon_retry", required=False,
+	help="Number of times to retry the recon")
+ap.add_argument("-rp", "--recon_period", required=False,
+	help="Time in seconds to trigger a recon and counter operation")
+
 args = vars(ap.parse_args())
 
 video_source = args["video"]
@@ -43,6 +75,8 @@ show_video = args["show"]
 record_video = args["record"]
 fps_to_video = args["fps"]
 recon_faces = args["recon_faces"]
+recon_retry = args["recon_retry"]
+recon_period= args["recon_period"]
 last_minute = -1
 
 quit = False
@@ -81,32 +115,9 @@ while vct.running():
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
 
-		# verifica se o num de retentativas de identificação é maior 0
-		# se for começa a piscar o led
-		if frf.recon_retry > 0 and frf.recon_retry <= 3:
-			if frf.recon_retry == 3:
-				GPIO.output(11, GPIO.HIGH)
-				time.sleep(0.3)
-				GPIO.output(11, GPIO.LOW)
-				time.sleep(0.3)
-			else:
-				GPIO.output(11, GPIO.HIGH)
-				time.sleep(0.5)
-				GPIO.output(11, GPIO.LOW)
-				time.sleep(0.5)
-			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-		else:
-			# Se não estiver dentro das retentativas coloca o estado atual
-			if frf.recon_status == True:
-				GPIO.output(11, GPIO.HIGH)
-				if led_current_status != True:
-					print("[RECON] LIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-					led_current_status = True
-			else:
-				GPIO.output(11, GPIO.LOW)
-				if led_current_status != False:
-					print("[RECON] DESLIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-					led_current_status = False
+			# verifica se o num de retentativas de identificação é maior 0
+			# se for começa a piscar o led
+		led_current_status = control_led(frf.recon_retry, recon_retry, led_current_status)
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
@@ -124,7 +135,7 @@ fps.stop()
 print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
-GPIO.output(11, GPIO.LOW)
+# GPIO.output(11, GPIO.LOW)
 
 # do a bit of cleanup
 cv2.destroyAllWindows()
