@@ -119,7 +119,7 @@ while vct.running():
 		else:
 			cv2.imshow(video_source, frame)
 
-	if recon_faces:
+	if bool(recon_faces):
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
