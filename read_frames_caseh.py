@@ -14,7 +14,7 @@ import cv2
 led_green = LED(17)
 led_red = LED(27)
 
-btn_main = Button(22)
+btn_main = Button(24)
 btn_aux = Button(23)
 
 def timestampFrame(fr):
@@ -149,6 +149,7 @@ while vct.running():
 		time.sleep(0.001)  # Ensures producer runs now, so 2 is sufficient
 	fps.update()
 	frame = None
+
 
 # stop the timer and display FPS information
 fps.stop()
