@@ -1,21 +1,18 @@
 from util.caseh.video_capture_thread import VideoCaptureThread
 from util.caseh.video_record_thread import VideoRecordThread
 from util.fullface.frame_recon import FrameReconFullFace
+from gpiozero import LED, Button
 from queue import Queue
 from imutils.video import FPS
 import argparse
 import imutils
 import time, datetime, logging
 import cv2
-# import RPi.GPIO as GPIO
 
 # Define LED de saída
-#GPIO.setwarnings(False)
-#GPIO.setmode(GPIO.BOARD)
 # PIN11 = GPIO17
-#GPIO.setup(11, GPIO.OUT)
-# inicia com LED desligado
-#GPIO.output(11, GPIO.LOW)
+led_green = LED(17)
+led_yellow = LED(27)
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
@@ -27,29 +24,32 @@ def timestampFrame(fr):
 def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
 		if int(retry_num) >= int(float(max_retry) * 0.8):
-			#GPIO.output(11, GPIO.HIGH)
-			time.sleep(0.25)
-			#GPIO.output(11, GPIO.LOW)
-			time.sleep(0.25)
+			led_yellow.on()
+			led_green.blink(0.25)
+			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
-			#GPIO.output(11, GPIO.HIGH)
-			time.sleep(0.5)
-			#GPIO.output(11, GPIO.LOW)
-			time.sleep(0.5)
-		print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+			led_yellow.blink(0.5)
+			led_green.on()
+			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
 		if frf.recon_status == True:
-			#GPIO.output(11, GPIO.HIGH)
+			led_yellow.off()
+			led_green.on()
 			if led_current_status != True:
 				print("[RECON] LIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 				led_current_status = True
 		else:
-			#GPIO.output(11, GPIO.LOW)
+			led_yellow.on()
+			led_green.off()
 			if led_current_status != False:
 				print("[RECON] DESLIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 				led_current_status = False
 	return led_current_status
+
+# Liga teste dos LEDs
+led_green.on()
+led_yellow.on()
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -82,6 +82,7 @@ last_minute = -1
 quit = False
 # start the file video stream thread and allow the buffer to
 # start to fill
+
 print("[INFO] starting video thread from: " + video_source)
 # fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
@@ -97,6 +98,11 @@ fps = FPS().start()
 vrt = None
 if record_video == 'True':
 	vrt = VideoRecordThread(video_source, queue).start()
+
+# Desliga teste dos LEDs
+led_green.on()
+led_yellow.on()
+
 # loop over frames from the video file stream
 while vct.running():
 	frame = vct.read()
@@ -111,12 +117,12 @@ while vct.running():
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
-		if (second % 10 == 0) or frf.insuficient_files_status:
+		if ((dtn - frf.last_recon_datetime).total_seconds() > recon_period) or frf.insuficient_files_status:
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
 
-			# verifica se o num de retentativas de identificação é maior 0
-			# se for começa a piscar o led
+		# verifica se o num de retentativas de identificação é maior 0
+		# se for começa a piscar o led
 		led_current_status = control_led(frf.recon_retry, recon_retry, led_current_status)
 
 	# Press Q on keyboard to stop recording

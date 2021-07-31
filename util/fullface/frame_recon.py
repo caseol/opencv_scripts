@@ -69,6 +69,7 @@ class FrameReconFullFace:
         self.path_done = path_done
 
         self.recon_status = False
+        self.last_recon_datetime = (datetime.datetime.now() - datetime.timedelta(hours=3))
         self.recon_retry = 0
         self.do_cropper = False
 
@@ -177,6 +178,7 @@ class FrameReconFullFace:
                             print("[RECON][RESULTADO:] Reconhecidos:" + str(recon_count) + " - Contagem: " + str(face_count))
                             if (recon_count == face_count):
                                 self.recon_status = True
+                                self.last_recon_datetime = datetime.datetime.now()
                             else:
                                 self.recon_status = False
                                 print("[RECON] Nenhum reconhecimento no frame: " + str(len(recon)))
