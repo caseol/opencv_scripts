@@ -23,10 +23,10 @@ def timestampFrame(fr):
 
 def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
-		if int(retry_num) >= int(float(max_retry) * 0.8):
+		if int(retry_num) >= int(float(max_retry) * 0.7):
 			led_red.blink(0.25)
 			led_green.off
-			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+			print("[RECON] PISCAR LED RAPIDO - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
 			led_red.blink(0.5)
 			led_green.on()
@@ -80,11 +80,8 @@ recon_period= args["recon_period"]
 last_minute = -1
 
 quit = False
-# start the file video stream thread and allow the buffer to
-# start to fill
 
 print("[INFO] starting video thread from: " + video_source)
-# fvs = FileVideoStream(args["video"], transform=filterFrame).start()
 
 # variavel para guardar status corrente do LED:
 led_current_status = False
@@ -92,7 +89,7 @@ led_current_status = False
 queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 if recon_faces:
-	frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/').start()
+	frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry).start()
 fps = FPS().start()
 
 vrt = None
@@ -100,8 +97,8 @@ if record_video == 'True':
 	vrt = VideoRecordThread(video_source, queue).start()
 
 # Desliga teste dos LEDs
-led_green.on()
-led_red.on()
+led_green.off()
+led_red.off()
 
 # loop over frames from the video file stream
 while vct.running():
@@ -117,9 +114,13 @@ while vct.running():
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
-		if (int((dtn - frf.last_recon_datetime).total_seconds()) > int(recon_period)) or frf.insuficient_files_status:
+		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
+
+		if (diff_from_last_recon > int(recon_period)) or (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
 			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 			frf.set_frame(frame, video_source)
+		else:
+			print("[RECON] OFF - ESTADO RECONHECIDO")
 
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led
@@ -141,7 +142,8 @@ fps.stop()
 print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
-# GPIO.output(11, GPIO.LOW)
+led_red.off()
+led_green.off()
 
 # do a bit of cleanup
 cv2.destroyAllWindows()

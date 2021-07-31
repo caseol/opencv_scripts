@@ -49,7 +49,7 @@ def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
 
 class FrameReconFullFace:
     def __init__(self, path_todo='recon/todo/', path_cropped='recon/cropped/', path_not_cropped='recon/not_cropped/',
-                 path_done='recon/done/'):
+                 path_done='recon/done/', max_retry=3):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
         self.stopped = False
@@ -71,6 +71,7 @@ class FrameReconFullFace:
         self.recon_status = False
         self.last_recon_datetime = (datetime.datetime.now() - datetime.timedelta(hours=3))
         self.recon_retry = 0
+        self.max_retry = int(max_retry)
         self.do_cropper = False
 
         # intialize thread
@@ -191,18 +192,19 @@ class FrameReconFullFace:
                 except Exception:
                     print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
                     self.recon_status = False
-                if self.recon_status == False and self.recon_retry < 3:
+
+                if self.recon_status == False and self.recon_retry < self.max_retry:
                     self.recon_retry = self.recon_retry + 1
                     self.recon_status = True
                     print("[RECON][RETENTATIVA] : " + str(self.recon_retry))
-                elif self.recon_status == False and self.recon_retry >= 3:
+                elif self.recon_status == False and self.recon_retry >= self.max_retry:
                     self.recon_retry = self.recon_retry + 1
                     # mantem o status false e cresce o num de retentativas
-                    print("[RECON][RETENTATIVA] : " + str(self.recon_retry))
+                    print("[RECON][RETENTATIVA] : " + str(self.recon_retry) + "/" + str(self.recon_retry))
                 else:
                     self.recon_retry = 0
 
-                imgBase64 = []
+
             else:
                 if self.insuficient_files_status != True:
                     print("[RECON] Qtd insuficiente para chamar reconhecimento. STATUS ATUAL: " + str(self.recon_status))
