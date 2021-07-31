@@ -12,7 +12,7 @@ import cv2
 # Define LED de saída
 # PIN11 = GPIO17
 led_green = LED(17)
-led_yellow = LED(27)
+led_red = LED(27)
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
@@ -24,23 +24,23 @@ def timestampFrame(fr):
 def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
 		if int(retry_num) >= int(float(max_retry) * 0.8):
-			led_yellow.on()
-			led_green.blink(0.25)
+			led_red.blink(0.25)
+			led_green.off
 			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
-			led_yellow.blink(0.5)
+			led_red.blink(0.5)
 			led_green.on()
 			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
 		if frf.recon_status == True:
-			led_yellow.off()
+			led_red.off()
 			led_green.on()
 			if led_current_status != True:
 				print("[RECON] LIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 				led_current_status = True
 		else:
-			led_yellow.on()
+			led_red.on()
 			led_green.off()
 			if led_current_status != False:
 				print("[RECON] DESLIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
@@ -49,7 +49,7 @@ def control_led(retry_num, max_retry, led_current_status):
 
 # Liga teste dos LEDs
 led_green.on()
-led_yellow.on()
+led_red.on()
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -101,7 +101,7 @@ if record_video == 'True':
 
 # Desliga teste dos LEDs
 led_green.on()
-led_yellow.on()
+led_red.on()
 
 # loop over frames from the video file stream
 while vct.running():
