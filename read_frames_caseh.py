@@ -13,6 +13,8 @@ import cv2
 # PIN11 = GPIO17
 led_green = LED(17)
 led_red = LED(27)
+btn_main = Button(22)
+btn_aux = Button(23)
 
 def timestampFrame(fr):
 	fr = imutils.resize(fr, width=640)
@@ -24,11 +26,11 @@ def timestampFrame(fr):
 def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
 		if int(retry_num) >= int(float(max_retry) * 0.7):
-			led_red.blink(0.25)
+			led_red.blink(0.25, 0.25)
 			led_green.off
 			print("[RECON] PISCAR LED RAPIDO - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
-			led_red.blink(0.5)
+			led_red.blink(0.5, 0.25)
 			led_green.on()
 			print("[RECON] PISCAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
@@ -46,6 +48,13 @@ def control_led(retry_num, max_retry, led_current_status):
 				print("[RECON] DESLIGAR LED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 				led_current_status = False
 	return led_current_status
+
+def check_buttons():
+	if btn_main.is_pressed:
+		led_red.on()
+	if btn_aux.is_pressed:
+		led_red.blink(0.5, 0.5)
+
 
 # Liga teste dos LEDs
 led_green.on()
@@ -126,6 +135,9 @@ while vct.running():
 		# se for começa a piscar o led
 		led_current_status = control_led(frf.recon_retry, recon_retry, led_current_status)
 
+	# verifica botoes
+	check_buttons()
+	
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q') or quit == True:
