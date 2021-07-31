@@ -93,9 +93,10 @@ class FrameReconFullFace:
         self.insuficient_files_status = True
         while True:
             # verifica se existem frames para croppar
+            # inicia a data de referencia do ciclo
+            dtn = datetime.datetime.now()
+
             if self.frame is not None:
-                # inicia a data de recebimento do frame
-                dtn = datetime.datetime.now()
                 # monta o caminho para gravar o frame em todo
                 to_recon_todo = self.path_todo + self.video_source.split('/')[-1] + "_" + dtn.strftime(
                     '%Y-%m-%d_%H_%M_%S_%f') + ".jpg"
@@ -203,7 +204,7 @@ class FrameReconFullFace:
                     print("[RECON][RETENTATIVA] : " + str(self.recon_retry) + "/" + str(self.recon_retry))
                 else:
                     self.recon_retry = 0
-                    
+
                 imgBase64 = []
             else:
                 if self.insuficient_files_status != True:
