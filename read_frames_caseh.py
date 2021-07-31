@@ -29,13 +29,8 @@ def control_led(retry_num, max_retry, led_current_status):
 		if int(retry_num) >= int(float(max_retry) * 0.85):
 			led_red.blink(0.25)
 			# led_green.on()
-			print("[RECON] PISCAR LED 0.25 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-		elif int(retry_num) >= int(float(max_retry) * 0.55):
-			led_red.blink(0.5)
-			# led_green.on()
-			print("[RECON] PISCAR LED 0.5 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 		else:
-			led_red.blink(0.75)
+			led_red.blink(0.5)
 			# led_green.on()
 			print("[RECON] PISCAR LED 0.75 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
