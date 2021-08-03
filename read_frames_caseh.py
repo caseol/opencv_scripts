@@ -13,6 +13,8 @@ import cv2
 # PIN11 = GPIO17
 led_green = LED(17)
 led_red = LED(27)
+led_yellow = LED(22)
+
 
 btn_main = Button(24)
 btn_aux = Button(23)
@@ -30,7 +32,7 @@ def control_led(retry_num, max_retry, led_current_status):
 			led_red.blink(0.25)
 			# led_green.on()
 		else:
-			led_red.blink(0.5)
+			led_red.blink(0.75)
 			# led_green.on()
 			print("[RECON] PISCAR LED 0.75 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
@@ -98,7 +100,8 @@ led_current_status = False
 queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 if recon_faces:
-	frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry).start()
+	frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry)
+
 fps = FPS().start()
 
 vrt = None
@@ -108,6 +111,8 @@ if record_video == 'True':
 # Desliga teste dos LEDs
 led_green.off()
 led_red.off()
+
+# Reconhecimento ligado? Pisca 2x LED de controle (amarelo)
 
 # loop over frames from the video file stream
 while vct.running():
@@ -127,9 +132,11 @@ while vct.running():
 
 		# print("[RECON] Condiçoes 1 RECON: (diff_from_last_recon > int(recon_period) " + str(diff_from_last_recon > int(recon_period)))
 		# print("[RECON] Condiçoes 2 RECON: (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry) " + str((frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry))))
-		if (diff_from_last_recon > int(recon_period)) or (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
-			print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-			frf.set_frame(frame, video_source)
+		if (diff_from_last_recon > int(recon_period)):
+			if (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
+				frf.set_frame(frame, video_source)
+				print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+
 
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led

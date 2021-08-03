@@ -12,14 +12,11 @@ import numpy as np
 # specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
 
 # Get a reference to webcam #0 (the default one)
-video_capture = cv2.VideoCapture('/dev/video2')
+video_capture = cv2.VideoCapture('/dev/video0')
 
 # Load a sample picture and learn how to recognize it.
-obama_image = face_recognition.load_image_file("resources/obama.jpg")
-obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
-
-biden_image = face_recognition.load_image_file("resources/biden.jpg")
-biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
+ricardo_image = face_recognition.load_image_file("resources/ricardinho.jpeg")
+ricardo_encoding = face_recognition.face_encodings(ricardo_image)[0]
 
 caseh_image = face_recognition.load_image_file("resources/caseh.jpg")
 caseh_face_encoding = face_recognition.face_encodings(caseh_image)[0]
@@ -27,13 +24,11 @@ caseh_face_encoding = face_recognition.face_encodings(caseh_image)[0]
 
 # Create arrays of known face encodings and their names
 known_face_encodings = [
-    obama_face_encoding,
-    biden_face_encoding,
+    ricardo_encoding,
     caseh_face_encoding
 ]
 known_face_names = [
-    "Barack Obama",
-    "Joe Biden",
+    "Ricardo",
     "Caseh"
 ]
 
