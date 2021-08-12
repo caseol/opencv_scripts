@@ -131,8 +131,7 @@ while vct.running():
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
 
-		# print("[RECON] Condiçoes 1 RECON: (diff_from_last_recon > int(recon_period) " + str(diff_from_last_recon > int(recon_period)))
-		# print("[RECON] Condiçoes 2 RECON: (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry) " + str((frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry))))
+		print("[RECON] diff_from_last_recon > int(recon_period): " + (diff_from_last_recon > int(recon_period)) + " diff_from_last_recon: " + diff_from_last_recon + " frf.last_recon_datetime: " + frf.last_recon_datetime)
 		if (diff_from_last_recon > int(recon_period)):
 			if (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
 				frf.set_frame(frame, video_source)
