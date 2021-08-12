@@ -124,7 +124,7 @@ while vct.running():
 		else:
 			cv2.imshow(video_source, frame)
 
-	print("[RECON] Is active? bool(recon_faces): " + bool(recon_faces) + " recon_faces: " + recon_faces)
+	print("[RECON] Is active? bool(recon_faces): " + str(bool(recon_faces)) + " recon_faces: " + str(recon_faces))
 	if bool(recon_faces):
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
