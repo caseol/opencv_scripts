@@ -133,8 +133,8 @@ while vct.running():
 
 		#print("[RECON] diff_from_last_recon > int(recon_period): " + str(diff_from_last_recon > int(recon_period)) + " diff_from_last_recon: " + str(diff_from_last_recon) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime))
 		if (diff_from_last_recon > int(recon_period)):
-			print("[RECON] (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)): " + str(frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)) + " frf.recon_status: " + str(frf.recon_status) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime) + " int(frf.recon_retry) >= int(recon_retry): " + str(int(frf.recon_retry) >= int(recon_retry)) + " int(frf.recon_retry): " + str(int(frf.recon_retry)) + " int(recon_retry): " + str(int(recon_retry)))
-			if (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
+			#print("[RECON] (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)): " + str(frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)) + " frf.recon_status: " + str(frf.recon_status) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime) + " int(frf.recon_retry) >= int(recon_retry): " + str(int(frf.recon_retry) >= int(recon_retry)) + " int(frf.recon_retry): " + str(int(frf.recon_retry)) + " int(recon_retry): " + str(int(recon_retry)))
+			#if (frf.recon_status == False or int(frf.recon_retry) >= int(recon_retry)):
 				frf.set_frame(frame, video_source)
 				print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
