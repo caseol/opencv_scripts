@@ -124,15 +124,16 @@ while vct.running():
 		else:
 			cv2.imshow(video_source, frame)
 
-	print("[RECON] Is active? bool(recon_faces): " + str(bool(recon_faces)) + " recon_faces: " + str(recon_faces))
+	#print("[RECON] Is active? bool(recon_faces): " + str(bool(recon_faces)) + " recon_faces: " + str(recon_faces))
 	if bool(recon_faces):
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
 
-		print("[RECON] diff_from_last_recon > int(recon_period): " + str(diff_from_last_recon > int(recon_period)) + " diff_from_last_recon: " + str(diff_from_last_recon) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime))
+		#print("[RECON] diff_from_last_recon > int(recon_period): " + str(diff_from_last_recon > int(recon_period)) + " diff_from_last_recon: " + str(diff_from_last_recon) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime))
 		if (diff_from_last_recon > int(recon_period)):
+			print("[RECON] (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)): " + str(frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)) + " frf.recon_status: " + str(frf.recon_status) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime) + " int(frf.recon_retry) >= int(recon_retry): " + str(int(frf.recon_retry) >= int(recon_retry)) + " int(frf.recon_retry): " + int(frf.recon_retry) + " int(recon_retry): " + int(recon_retry))
 			if (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)):
 				frf.set_frame(frame, video_source)
 				print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
