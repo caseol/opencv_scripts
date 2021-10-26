@@ -145,69 +145,68 @@ class FrameReconFullFace:
                     print("[E][RECON]" + str(sys.exc_info()))
 
             if len(imgBase64) > 4:
-                print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-                self.insuficient_files_status = False
+                # Chama a contagem para o frame e só chamar o reconhecimento se a contagem de faces for maior que 0
+                face_count = self.get_face_count(imgBase64[0], token)
+                if face_count > 0:
+                    print("[RECON] Starting RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+                    self.insuficient_files_status = False
 
-                url = "http://www.fullfacelab.com/fffacerecognition_NC/autapi/users/authenticate"
-                token = self.get_token()
-                payload = json.dumps({
-                    "projectName": "a94df8b7-90fd-49ac-9173-1f4da3782c6e",
-                    "accessToken": token,
-                    "keys": [],
-                    "pictures": imgBase64
-                })
-                headers = {
-                    'Content-Type': 'application/json'
-                }
-                try:
-                    response = requests.request("POST", url, headers=headers, data=payload)
-                    end_autenticate = datetime.datetime.now()
-                    print("[RECON][Retorno Fullcace] Tempo: " + str((end_autenticate - dtn).total_seconds()))
-                    print("[RECON][Retorno Fullcace] Resposta: " + response.text)
+                    url = "http://www.fullfacelab.com/fffacerecognition_NC/autapi/users/authenticate"
+                    token = self.get_token()
+                    payload = json.dumps({
+                        "projectName": "a94df8b7-90fd-49ac-9173-1f4da3782c6e",
+                        "accessToken": token,
+                        "keys": [],
+                        "pictures": imgBase64
+                    })
+                    headers = {
+                        'Content-Type': 'application/json'
+                    }
                     try:
-                        if 'keys' in response.json():
-                            # retorna uma lista (array) com pares de hash
-                            recon = response.json()['keys']
-                            # verifica se para cada item da lista a qtd de key cujo valor é 'nome'
-                            recon_count = 0
-                            for hash in recon:
-                                recon_count = recon_count + len([k for k, v in hash.items() if v == 'nome'])
+                        response = requests.request("POST", url, headers=headers, data=payload)
+                        end_autenticate = datetime.datetime.now()
+                        print("[RECON][Retorno Fullcace] Tempo: " + str((end_autenticate - dtn).total_seconds()))
+                        print("[RECON][Retorno Fullcace] Resposta: " + response.text)
+                        try:
+                            if 'keys' in response.json():
+                                # retorna uma lista (array) com pares de hash
+                                recon = response.json()['keys']
+                                # verifica se para cada item da lista a qtd de key cujo valor é 'nome'
+                                recon_count = 0
+                                for hash in recon:
+                                    recon_count = recon_count + len([k for k, v in hash.items() if v == 'nome'])
 
-                            print("[RECON] Qtd keys 'nome' retornadas pela Fullface: " + str(recon_count))
-
-                            # Chama a contagem para o frame
-                            face_count = self.get_face_count(imgBase64[0], token)
-                            print("[RECON][RESULTADO:] Reconhecidos:" + str(recon_count) + " - Contagem: " + str(face_count))
-                            if (recon_count == face_count):
-                                self.recon_status = True
-                                self.last_recon_datetime = datetime.datetime.now()
+                                print("[RECON] Qtd keys 'nome' retornadas pela Fullface: " + str(recon_count))
+                                print("[RECON][RESULTADO:] Reconhecidos:" + str(recon_count) + " - Contagem: " + str(face_count))
+                                if (recon_count == face_count):
+                                    self.recon_status = True
+                                    self.last_recon_datetime = datetime.datetime.now()
+                                else:
+                                    self.recon_status = False
+                                    print("[RECON] Nenhum reconhecimento no frame: " + str(recon_count))
                             else:
+                                print("[RECON][RESULTADO:]: " + str(self.recon_status))
                                 self.recon_status = False
-                                print("[RECON] Nenhum reconhecimento no frame: " + str(recon_count))
-                        else:
-                            print("[RECON][RESULTADO:]: " + str(self.recon_status))
+                        except Exception:
+                            print("[E][RECON] frame_recon.py linhas 167 a 185" + str(sys.exc_info()))
                             self.recon_status = False
                     except Exception:
-                        print("[E][RECON] frame_recon.py linhas 167 a 185" + str(sys.exc_info()))
+                        print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
                         self.recon_status = False
-                except Exception:
-                    print("[E][RECON] frame_recon.py linha 161" + str(sys.exc_info()))
-                    self.recon_status = False
 
-                if self.recon_status == False and self.recon_retry < self.max_retry:
-                    self.recon_retry = self.recon_retry + 1
-                    self.recon_status = True
-                    print("[RECON][RETENTATIVA] Status OK : " + str(self.recon_retry)+ "/"  + str(self.max_retry))
-                elif self.recon_status == False and self.recon_retry >= self.max_retry:
-                    self.recon_retry = self.recon_retry + 1
-                    # mantem o status false e cresce o num de retentativas
-                    print("[RECON][RETENTATIVA]  Status NOK: " + str(self.recon_retry) + "/" + str(self.max_retry))
-                else:
-                    self.recon_retry = 0
-                    print("[RECON][RETENTATIVA][ZERADO]: " + str(self.recon_retry) + "/" + str(self.max_retry))
+                    if self.recon_status == False and self.recon_retry < self.max_retry:
+                        self.recon_retry = self.recon_retry + 1
+                        self.recon_status = True
+                        print("[RECON][RETENTATIVA] Status OK : " + str(self.recon_retry)+ "/"  + str(self.max_retry))
+                    elif self.recon_status == False and self.recon_retry >= self.max_retry:
+                        self.recon_retry = self.recon_retry + 1
+                        # mantem o status false e cresce o num de retentativas
+                        print("[RECON][RETENTATIVA]  Status NOK: " + str(self.recon_retry) + "/" + str(self.max_retry))
+                    else:
+                        self.recon_retry = 0
+                        print("[RECON][RETENTATIVA][ZERADO]: " + str(self.recon_retry) + "/" + str(self.max_retry))
 
-
-                imgBase64 = []
+                    imgBase64 = []
             else:
                 if self.insuficient_files_status != True:
                     print("[RECON] Sem imagens para reconhecimento. STATUS ATUAL: " + str(self.recon_status))

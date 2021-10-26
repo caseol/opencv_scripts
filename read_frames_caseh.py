@@ -1,6 +1,8 @@
 from util.caseh.video_capture_thread import VideoCaptureThread
 from util.caseh.video_record_thread import VideoRecordThread
-from util.fullface.frame_recon import FrameReconFullFace
+from util.caseh.frame_recon_thread import FrameReconThread
+# from util.fullface.frame_recon import FrameReconFullFace
+
 from gpiozero import LED, Button
 from queue import Queue
 from imutils.video import FPS
@@ -103,7 +105,7 @@ queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 
 if recon_faces:
-	frf = FrameReconFullFace('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry).start()
+	frf = FrameReconThread('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry).start()
 
 vrt = None
 if record_video == 'True':
@@ -125,20 +127,25 @@ while vct.running():
 		else:
 			cv2.imshow(video_source, frame)
 
-	#print("[RECON] Is active? bool(recon_faces): " + str(bool(recon_faces)) + " recon_faces: " + str(recon_faces))
+	# print("[RECON] Is active? bool(recon_faces): " + str(bool(recon_faces)) + " recon_faces: " + str(recon_faces))
 	if bool(recon_faces):
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frf.last_recon_datetime).total_seconds())
 
-		#print("[RECON] diff_from_last_recon > int(recon_period): " + str(diff_from_last_recon > int(recon_period)) + " diff_from_last_recon: " + str(diff_from_last_recon) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime))
+		# print("[RECON] diff_from_last_recon > int(recon_period): "
+		# + str(diff_from_last_recon > int(recon_period)) + " diff_from_last_recon: " + str(diff_from_last_recon)
+		# + " frf.last_recon_datetime: " + str(frf.last_recon_datetime))
 		if (diff_from_last_recon > int(recon_period)):
-			#print("[RECON] (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)): " + str(frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)) + " frf.recon_status: " + str(frf.recon_status) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime) + " int(frf.recon_retry) >= int(recon_retry): " + str(int(frf.recon_retry) >= int(recon_retry)) + " int(frf.recon_retry): " + str(int(frf.recon_retry)) + " int(recon_retry): " + str(int(recon_retry)))
-			#if (frf.recon_status == False or int(frf.recon_retry) >= int(recon_retry)):
+			# print("[RECON] (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)): "
+			# + str(frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)) + " frf.recon_status: "
+			# + str(frf.recon_status) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime)
+			# + " int(frf.recon_retry) >= int(recon_retry): " + str(int(frf.recon_retry) >= int(recon_retry))
+			# + " int(frf.recon_retry): " + str(int(frf.recon_retry)) + " int(recon_retry): " + str(int(recon_retry)))
+			# if (frf.recon_status == False or int(frf.recon_retry) >= int(recon_retry)):
 				frf.set_frame(frame, video_source)
 				print("[RECON] Setting frame to RECON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-
 
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led
