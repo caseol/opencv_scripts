@@ -94,11 +94,18 @@ while True:
 		# loop sobre as faces reconhecidas
 		for ((top, right, bottom, left), name) in zip(boxes, names):
 			# draw the predicted face name on the image
+			if name == "Desconhecido":
+				# cor vermelha
+				_color = (0, 0, 255)
+			else:
+				# cor verde
+				_color = (0, 255, 0)
+
 			cv2.rectangle(frame, (left, top), (right, bottom),
-				(0, 255, 0), 2)
+				_color, 2)
 			y = top - 15 if top - 15 > 15 else top + 15
 			cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
-				0.75, (0, 255, 0), 2)
+				0.75, _color, 2)
 
 		# mostra a image na tela
 		cv2.imshow("Frame", frame)

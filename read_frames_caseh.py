@@ -102,7 +102,7 @@ led_current_status = False
 
 fps = FPS().start()
 
-queue = Queue(maxsize=256)
+queue = Queue(maxsize=512)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 
 if recon_faces:
@@ -133,21 +133,24 @@ while vct.running():
 		# print("[RECON] diff_from_last_recon > int(recon_period): "
 		# + str(diff_from_last_recon > int(recon_period)) + " diff_from_last_recon: " + str(diff_from_last_recon)
 		# + " frf.last_recon_datetime: " + str(frf.last_recon_datetime))
-		# diff_from_last_recon > int(recon_period) or
-		if not frt.recon_status:
-			# print("[RECON] (frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)): "
-			# + str(frf.recon_status == False and int(frf.recon_retry) >= int(recon_retry)) + " frf.recon_status: "
-			# + str(frf.recon_status) + " frf.last_recon_datetime: " + str(frf.last_recon_datetime)
-			# + " int(frf.recon_retry) >= int(recon_retry): " + str(int(frf.recon_retry) >= int(recon_retry))
-			# + " int(frf.recon_retry): " + str(int(frf.recon_retry)) + " int(recon_retry): " + str(int(recon_retry)))
-			# if (frf.recon_status == False or int(frf.recon_retry) >= int(recon_retry)):
-			print("[RECON] Setting frame to RECON: 1a = " + str(diff_from_last_recon > int(recon_period)) + " 2a= " + str(frt.recon_status) +" - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+		# if diff_from_last_recon > int(recon_period) or not frt.recon_status:
+		#
+		if diff_from_last_recon > int(recon_period) and frt.recon_status:
 			frt.set_frame(frame)
+			print("[RECON] Entrou no if diff_from_last_recon > int(recon_period)")
+
+		if int(frt.recon_retry) > int(recon_retry) or not frt.recon_status:
+			frt.recon_retry = 0
+			frt.set_frame(frame)
+			print("[RECON] Entrou no if int(frt.recon_retry) > int(recon_retry) or not frt.recon_status")
+
+		print("[RECON] Setting frame to RECON: 1a = " + str(diff_from_last_recon > int(recon_period)) + " 2a= " + str(
+				frt.recon_status) + " - qsize() - " + str(frt.queue.qsize()) + "- DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 		if frt.queue.qsize() > 0:
 			# mostra a imagem do reconhecimento na tela
 			frame = frt.queue.get()
-			#cv2.imshow("RECON iCar: " + video_source, frame)
+			cv2.imshow("RECON iCar:", frame)
 
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led

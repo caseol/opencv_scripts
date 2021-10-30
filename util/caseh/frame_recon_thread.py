@@ -47,6 +47,12 @@ class FrameReconThread(object):
         self.stopped = False
         return self
 
+    def stop(self):
+        # indicate that the thread should be stopped
+        self.stopped = True
+        # wait until stream resources are released (producer thread might be still grabbing frame)
+        self.thread.join()
+
     def set_frame(self, frame):
         self.frames.append(frame)
         # Resize frame of video to 1/4 size for faster face recognition processing
@@ -60,6 +66,8 @@ class FrameReconThread(object):
         while True:
             dtn = datetime.datetime.now()
             # if the thread indicator variable is set, stop the thread
+            if self.stopped:
+                break
 
             for frame in self.frames:
                 # FAZ O RECON AQUI
@@ -83,6 +91,7 @@ class FrameReconThread(object):
                 names = []
 
                 # loop sobre os pontos dos modelos
+                self.count = len(encodings)
                 for encoding in encodings:
                     # tenta dar match de cada face com o modelo
                     # modelo = data["encodings"]
@@ -116,14 +125,22 @@ class FrameReconThread(object):
                 for ((top, right, bottom, left), name) in zip(boxes, names):
                     if name == "Desconhecido":
                         recon_false.append(name)
+                        # desenha em vermelho
+                        # draw the predicted face name on the image
+                        cv2.rectangle(frame, (left, top), (right, bottom),
+                                      (0, 0, 255), 2)
+                        y = top - 15 if top - 15 > 15 else top + 15
+                        cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.75, (0, 0, 255), 2)
                     else:
                         recon_true.append(name)
-                    # draw the predicted face name on the image
-                    cv2.rectangle(frame, (left, top), (right, bottom),
-                                  (0, 255, 0), 2)
-                    y = top - 15 if top - 15 > 15 else top + 15
-                    cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.75, (0, 255, 0), 2)
+                        # draw the predicted face name on the image
+                        cv2.rectangle(frame, (left, top), (right, bottom),
+                                      (0, 255, 0), 2)
+                        y = top - 15 if top - 15 > 15 else top + 15
+                        cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.75, (0, 255, 0), 2)
+
                 # disponibiliza o recon na thread principal
                 self.queue.put(frame)
                 if self.stopped:
