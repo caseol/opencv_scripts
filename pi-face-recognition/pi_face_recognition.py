@@ -2,6 +2,7 @@
 # python pi_face_recognition.py --cascade haarcascade_frontalface_default.xml --encodings encodings.pickle
 
 # import the necessary packages
+from vidgear.gears import CamGear
 from imutils.video import VideoStream
 from imutils.video import FPS
 import face_recognition
@@ -27,7 +28,15 @@ detector = cv2.CascadeClassifier(args["cascade"])
 
 # initialize the video stream and allow the camera sensor to warm up
 print("[INFO] starting video stream...")
-vs = VideoStream(src=0).start()
+# vs = VideoStream(src=0).start()
+
+options = {
+    "CAP_PROP_FRAME_WIDTH": 640,
+    "CAP_PROP_FRAME_HEIGHT": 480,
+    "CAP_PROP_FPS": 30,
+}
+
+vs = CamGear(source=0, logging=True, **options).start()
 # vs = VideoStream(usePiCamera=True).start()
 time.sleep(2.0)
 

@@ -1,18 +1,19 @@
 # import required libraries
 from vidgear.gears import CamGear
+from vidgear.gears import WriteGear
 import cv2
 
-
-# define suitable tweak parameters for your stream.
+# open any valid video stream(for e.g `myvideo.avi` file)
 options = {
-    "CAP_PROP_FRAME_WIDTH": 320,
-    "CAP_PROP_FRAME_HEIGHT": 240,
+    "CAP_PROP_FRAME_WIDTH": 640,
+    "CAP_PROP_FRAME_HEIGHT": 480,
     "CAP_PROP_FPS": 30,
 }
 
-# To open live video stream on webcam at first index(i.e. 0)
-# device and apply source tweak parameters
 stream = CamGear(source=0, logging=True, **options).start()
+
+# Define writer with Non-compression mode and suitable output filename for e.g. `Output.mp4`
+writer = WriteGear(output_filename="Output.mp4", compression_mode=False)
 
 # loop over
 while True:
@@ -26,8 +27,11 @@ while True:
 
     # {do something with the frame here}
 
+    # write frame to writer
+    writer.write(frame)
+
     # Show output window
-    cv2.imshow("Output", frame)
+    cv2.imshow("Output Frame", frame)
 
     # check for 'q' key if pressed
     key = cv2.waitKey(1) & 0xFF
@@ -39,3 +43,6 @@ cv2.destroyAllWindows()
 
 # safely close video stream
 stream.stop()
+
+# safely close writer
+writer.close()
