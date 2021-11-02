@@ -102,7 +102,7 @@ led_current_status = False
 
 fps = FPS().start()
 
-queue = Queue(maxsize=512)
+queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 
 if recon_faces:
@@ -125,6 +125,7 @@ while vct.running():
 	if bool(recon_faces):
 		if frt.stopped:
 			frt.start()
+			print("[RECON] Inicia worker de reconhecimento: frt.start()")
 		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
@@ -196,6 +197,8 @@ print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 # do a bit of cleanup
 cv2.destroyAllWindows()
 vct.stop()
-frt.stop()
+if not frt.stopped:
+	frt.stop()
+
 # deliga LED
 exit(1)

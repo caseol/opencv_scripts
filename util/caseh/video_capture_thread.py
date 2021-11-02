@@ -30,7 +30,7 @@ class VideoCaptureThread:
         # intialize thread
         self.thread = Thread(target=self.update, args=())
         self.thread.daemon = True
-        self.read_lock = Lock()
+        # self.read_lock = Lock()
 
     def start(self):
         # start a thread to read frames from the file video stream

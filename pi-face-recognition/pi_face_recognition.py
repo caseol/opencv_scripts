@@ -75,7 +75,7 @@ while True:
 			# tenta dar match de cada face com o modelo
 			# modelo = data["encodings"]
 			matches = face_recognition.compare_faces(data["encodings"],
-				encoding)
+				encoding, 0.75)
 			name = "Desconhecido"
 
 			# verifica se tem os pontos

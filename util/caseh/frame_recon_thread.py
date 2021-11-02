@@ -55,8 +55,8 @@ class FrameReconThread(object):
 
     def set_frame(self, frame):
         self.frames.append(frame)
-        # Resize frame of video to 1/4 size for faster face recognition processing
-        self.small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+        # Resize frame of video to   1/4 size for faster face recognition processing
+        #self.small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
     def recon_frame(self):
         # Read the next frame from the stream in a different thread
@@ -78,7 +78,7 @@ class FrameReconThread(object):
 
                 # detecta faces no frame em grayscale
                 rects = self.detector.detectMultiScale(gray, scaleFactor=1.1,
-                                                  minNeighbors=5, minSize=(30, 30),
+                                                  minNeighbors=6, minSize=(30, 30),
                                                   flags=cv2.CASCADE_SCALE_IMAGE)
 
                 # OpenCV returna as coordenadas da box no formato (x, y, w, h)
@@ -153,12 +153,10 @@ class FrameReconThread(object):
             if len(recon_false) >= len(recon_true) or len(recon_true) == 0:
                 self.recon_status = False
                 self.recon_retry = self.recon_retry + 1
+                print("NÃO RECONHECIDO!")
             else:
                 # informa horário do último reconhecimento
                 self.last_recon_datetime = datetime.datetime.now()
                 self.recon_status = True
                 self.recon_retry = 0
-
-
-
-
+                print("RECONHECIDO!!!")
