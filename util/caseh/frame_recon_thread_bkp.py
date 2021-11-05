@@ -43,8 +43,8 @@ class FrameReconThread(object):
 
     def start(self):
         # start a thread to read frames from the file video stream
-        self.stopped = False
         self.thread.start()
+        self.stopped = False
         return self
 
     def stop(self):
@@ -69,9 +69,8 @@ class FrameReconThread(object):
             if self.stopped:
                 break
 
-            print("Quantidade de frames para reconhecimento: " + str(len(self.frames)))
             for frame in self.frames:
-                # COMEÇA O RECON AQUI
+                # FAZ O RECON AQUI
                 # convert the input frame from (1) BGR to grayscale (for face
                 # detection) and (2) from BGR to RGB (for face recognition)
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -79,7 +78,7 @@ class FrameReconThread(object):
 
                 # detecta faces no frame em grayscale
                 rects = self.detector.detectMultiScale(gray, scaleFactor=1.1,
-                                                  minNeighbors=6, minSize=(40, 40),
+                                                  minNeighbors=6, minSize=(30, 30),
                                                   flags=cv2.CASCADE_SCALE_IMAGE)
 
                 # OpenCV returna as coordenadas da box no formato (x, y, w, h)
@@ -87,20 +86,17 @@ class FrameReconThread(object):
                 # precisamos reordenar as coordenadas
                 boxes = [(y, x + w, y + h, x) for (x, y, w, h) in rects]
 
-                # calcula os encodings/pontos para cada face nas boxes para comparar com o modelo
+                # calcula os encodings/pontos para cada face na box de acordo com o modelo
                 encodings = face_recognition.face_encodings(rgb, boxes)
-                # fim da detecção de faces
-
-                # quantidade de faces encontradas
                 names = []
-                self.count = len(encodings)
 
-                # loop sobre cada enconding encontrado e compara com o modelo
+                # loop sobre os pontos dos modelos
+                self.count = len(encodings)
                 for encoding in encodings:
                     # tenta dar match de cada face com o modelo
                     # modelo = data["encodings"]
                     matches = face_recognition.compare_faces(self.data["encodings"],
-                                                             encoding, 0.4)
+                                                             encoding)
                     name = "Desconhecido"
 
                     # verifica se tem match no reconhecimento
@@ -125,27 +121,33 @@ class FrameReconThread(object):
                     # atualiza a list de nomes
                     names.append(name)
 
+                # loop sobre as faces reconhecidas
                 for ((top, right, bottom, left), name) in zip(boxes, names):
-                    # draw the predicted face name on the image
                     if name == "Desconhecido":
                         recon_false.append(name)
-                        # cor vermelha
-                        _color = (0, 0, 255)
+                        # desenha em vermelho
+                        # draw the predicted face name on the image
+                        cv2.rectangle(frame, (left, top), (right, bottom),
+                                      (0, 0, 255), 2)
+                        y = top - 15 if top - 15 > 15 else top + 15
+                        cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.75, (0, 0, 255), 2)
                     else:
                         recon_true.append(name)
-                        # cor verde
-                        _color = (0, 255, 0)
-
-                    cv2.rectangle(frame, (left, top), (right, bottom),
-                                  _color, 2)
-                    y = top - 15 if top - 15 > 15 else top + 15
-                    cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
-                                0.75, _color, 2)
+                        # draw the predicted face name on the image
+                        cv2.rectangle(frame, (left, top), (right, bottom),
+                                      (0, 255, 0), 2)
+                        y = top - 15 if top - 15 > 15 else top + 15
+                        cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.75, (0, 255, 0), 2)
 
                 # disponibiliza o recon na thread principal
                 self.queue.put(frame)
+                if self.stopped:
+                    break
 
-            # temos que sumarizar os frames para poder extrair a contagem e o reconhecimento
+            # limpa o array de frames para recon
+            self.frames.clear()
 
             # self.count_recon = names.count()
             if len(recon_false) >= len(recon_true) or len(recon_true) == 0:
@@ -158,6 +160,3 @@ class FrameReconThread(object):
                 self.recon_status = True
                 self.recon_retry = 0
                 print("RECONHECIDO!!!")
-
-            # limpa o array de frames para recon
-            self.frames.clear()

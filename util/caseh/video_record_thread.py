@@ -15,8 +15,9 @@ class VideoRecordThread(object):
         self.dt = datetime.datetime.now()
 
         # Set up codec and output video settings
-        self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
-        self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M') + ".avi"
+        # self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
+        self.codec = cv2.VideoWriter_fourcc('T', 'H', 'E', 'O')
+        self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".ogv"
         self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
 
         # inicializa variável do frame

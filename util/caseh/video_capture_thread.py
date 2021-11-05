@@ -24,7 +24,7 @@ class VideoCaptureThread:
         # self.Q = Queue(maxsize=queue_size)
         self.Q = queue
         # add the frame to the queue
-        if self.grabbed == 'True':
+        if self.grabbed:
             self.Q.put(self.frame)
 
         # intialize thread
