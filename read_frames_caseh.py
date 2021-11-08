@@ -136,9 +136,9 @@ while vct.running():
 
 		# dispara o reconhecimento a cada recon_period
 		if second % int(recon_period) == 0:
-			if frt.queue.not_full:
-				frt.set_frame(frame)
-				print("[RECON] set_frame segundo: " + str(second))
+			# if frt.queue.not_full:
+			frt.set_frame(frame)
+			print("[RECON] set_frame segundo: " + str(second))
 
 	dtn_final = datetime.datetime.now() - dtn
 

@@ -13,7 +13,7 @@ class FrameReconThread(object):
         # flag control
         self.stopped = True
         self.dt = datetime.datetime.now()
-        self.queue = Queue(maxsize=512)
+        self.queue = Queue(maxsize=256)
         self.data = pickle.loads(open("resources/encodings.pickle", "rb").read())
         self.detector = cv2.CascadeClassifier("resources/haarcascade_frontalface_default.xml")
 
@@ -69,7 +69,8 @@ class FrameReconThread(object):
                 break
 
             print("TAMANHO FILA: " +str(self.queue.qsize()))
-            if self.queue.not_empty:
+
+            while self.queue.not_empty:
                 frame = self.queue.get()
                 recon_false = []
                 recon_true = []
