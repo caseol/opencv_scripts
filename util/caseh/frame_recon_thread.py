@@ -69,7 +69,6 @@ class FrameReconThread(object):
             if self.stopped:
                 break
 
-            print("Quantidade de frames para reconhecimento: " + str(len(self.frames)))
             for frame in self.frames:
                 # COMEÇA O RECON AQUI
                 # convert the input frame from (1) BGR to grayscale (for face
