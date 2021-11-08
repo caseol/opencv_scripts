@@ -56,9 +56,9 @@ def control_led(retry_num, max_retry, led_current_status):
 	return led_current_status
 
 def check_buttons():
-	if btn_main.is_pressed:
+	if btn_main.is_pressed():
  		print("[BUTTON] BTN_MAIN - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
- 	if btn_aux.is_pressed:
+ 	if btn_aux.is_pressed():
  		print("[BUTTON] BTN_AUX - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 
