@@ -148,7 +148,7 @@ while vct.running():
 		led_current_status) + " - " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 	# verifica botoes
-	check_buttons()
+	# check_buttons()
 
 	if show_video == 'True':
 		cv2.imshow(video_source, frame)
