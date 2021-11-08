@@ -1,6 +1,7 @@
 from threading import Thread
 from queue import Queue
 import cv2
+import time
 import datetime
 import face_recognition
 import pickle
@@ -17,7 +18,6 @@ class FrameReconThread(object):
         self.detector = cv2.CascadeClassifier("resources/haarcascade_frontalface_default.xml")
 
         # inicializa variável do frame
-        self.frames = []
         self.recon_frames = []
         self.small_frame = 0
 
@@ -54,22 +54,24 @@ class FrameReconThread(object):
         self.thread.join()
 
     def set_frame(self, frame):
-        self.frames.append(frame)
+        # self.frames.append(frame)
+        self.queue.put(frame)
         # Resize frame of video to   1/4 size for faster face recognition processing
         #self.small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
     def recon_frame(self):
         # Read the next frame from the stream in a different thread
         last_minute = -1
-        recon_true = []
-        recon_false = []
         while True:
             dtn = datetime.datetime.now()
             # if the thread indicator variable is set, stop the thread
             if self.stopped:
                 break
 
-            for frame in self.frames:
+            if self.queue.not_empty:
+                frame = self.queue.get()
+                recon_false = []
+                recon_true = []
                 # COMEÇA O RECON AQUI
                 # convert the input frame from (1) BGR to grayscale (for face
                 # detection) and (2) from BGR to RGB (for face recognition)
@@ -141,22 +143,17 @@ class FrameReconThread(object):
                     cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
                                 0.75, _color, 2)
 
-                # disponibiliza o recon na thread principal
-                self.queue.put(frame)
-
-            # temos que sumarizar os frames para poder extrair a contagem e o reconhecimento
-
-            # self.count_recon = names.count()
-            if len(recon_false) >= len(recon_true) or len(recon_true) == 0:
-                self.recon_status = False
-                self.recon_retry = self.recon_retry + 1
-                print("NÃO RECONHECIDO!")
+                # temos que sumarizar os frames para poder extrair a contagem e o reconhecimento
+                # self.count_recon = names.count()
+                if len(recon_false) > len(recon_true) or len(recon_true) == 0:
+                    self.recon_status = False
+                    self.recon_retry = self.recon_retry + 1
+                    print("NÃO RECONHECIDO!")
+                else:
+                    # informa horário do último reconhecimento
+                    self.last_recon_datetime = datetime.datetime.now()
+                    self.recon_status = True
+                    self.recon_retry = 0
+                    print("RECONHECIDO!!!")
             else:
-                # informa horário do último reconhecimento
-                self.last_recon_datetime = datetime.datetime.now()
-                self.recon_status = True
-                self.recon_retry = 0
-                print("RECONHECIDO!!!")
-
-            # limpa o array de frames para recon
-            self.frames.clear()
+                time.sleep(0.2)  # Rest for 10ms, we have a full queue

@@ -3,7 +3,7 @@ from util.caseh.video_record_thread import VideoRecordThread
 from util.caseh.frame_recon_thread import FrameReconThread
 # from util.fullface.frame_recon import FrameReconFullFace
 
-from gpiozero import LED, Button
+# from gpiozero import LED, Button
 from queue import Queue
 from imutils.video import FPS
 import argparse
@@ -14,13 +14,13 @@ import datetime
 import cv2
 
 # Define LED de saída
-led_green = LED(17)
-led_red = LED(27)
-led_yellow = LED(22)
+# led_green = LED(17)
+# led_red = LED(27)
+# led_yellow = LED(22)
 
 
-btn_main = Button(24)
-btn_aux = Button(23)
+# btn_main = Button(24)
+# btn_aux = Button(23)
 
 def timestampFrame(fr):
 	# fr = imutils.resize(fr, width=640)
@@ -33,38 +33,38 @@ def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
 		if int(retry_num) >= int(float(max_retry) * 0.85):
 			print("[RECON] GREEN ON + PISCAR RED 0.25 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-			led_red.blink(0.25)
-			led_green.on()
+			# led_red.blink(0.25)
+			# led_green.on()
 		else:
-			led_red.blink(0.75)
-			led_green.on()
+			# led_red.blink(0.75)
+			# led_green.on()
 			print("[RECON] GREEN ON + PISCAR RED 0.75 - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
 		if frt.recon_status == True:
-			led_red.off()
-			led_green.on()
+			# led_red.off()
+			# led_green.on()
 			if led_current_status != True:
 				print("[RECON] RECON TRUE = LIGAR GREEN + RED OFF - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 				led_current_status = True
 		else:
-			led_red.on()
-			led_green.off()
+			# led_red.on()
+			# led_green.off()
 			if led_current_status != False:
 				print("[RECON] RECON FALSE = GREEN OFF + RED ON - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 				led_current_status = False
 	return led_current_status
 
-def check_buttons():
-	if btn_main.is_pressed:
- 		print("[BUTTON] BTN_MAIN - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
- 	if btn_aux.is_pressed:
- 		print("[BUTTON] BTN_AUX - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+# def check_buttons():
+# 	if btn_main.is_pressed:
+# 		print("[BUTTON] BTN_MAIN - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+# 	if btn_aux.is_pressed:
+# 		print("[BUTTON] BTN_AUX - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 
 # Liga teste dos LEDs
-led_green.on()
-led_red.on()
+# led_green.on()
+# led_red.on()
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -91,7 +91,7 @@ record_video = args["record"]
 fps_to_video = args["fps"]
 recon_faces = args["recon_faces"] or True
 recon_retry = args["recon_retry"] or 3
-recon_period= args["recon_period"] or 5
+recon_period= args["recon_period"] or 30
 last_minute = -1
 
 quit = False
@@ -114,8 +114,8 @@ if record_video == 'True':
 	vrt = VideoRecordThread(video_source, queue).start()
 
 # Desliga teste dos LEDs
-led_green.off()
-led_red.off()
+# led_green.off()
+# led_red.off()
 
 # Reconhecimento ligado? Pisca 2x LED de controle (amarelo)
 
@@ -140,15 +140,27 @@ while vct.running():
 				frt.set_frame(frame)
 				print("[RECON] set_frame segundo: " + str(second))
 
+#		if diff_from_last_recon > int(recon_period) and frt.recon_status:
+#			frt.set_frame(frame)
+#			print("[RECON] Entrou no if diff_from_last_recon > int(recon_period)")
+
+#		if int(frt.recon_retry) > int(recon_retry) or not frt.recon_status:
+#			frt.recon_retry = 0
+#			frt.set_frame(frame)
+#			print("[RECON] Entrou no if int(frt.recon_retry) > int(recon_retry) or not frt.recon_status")
+
+		# print("[RECON] Setting frame to RECON: 1a = " + str(diff_from_last_recon > int(recon_period)) + " 2a= " + str(frt.recon_status) + " - qsize() - " + str(frt.queue.qsize()) + "- DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+
+		# verifica se o num de retentativas de identificação é maior 0
+		# se for começa a piscar o led
 	dtn_final = datetime.datetime.now() - dtn
+	print("[RECON] RECON STATUS:" + str(frt.recon_status) + " - RETRY:" + str(frt.recon_retry) + " - " + str(diff_from_last_recon) + " - " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 	# Controla LEDs
 	led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
-	print("[RECON] RECON STATUS:" + str(frt.recon_status) + " - RETRY:" + str(frt.recon_retry) + " - LED:" + str(
-		led_current_status) + " - " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
 	# verifica botoes
-	check_buttons()
+	# check_buttons()
 
 	if show_video == 'True':
 		cv2.imshow(video_source, frame)
@@ -159,8 +171,8 @@ while vct.running():
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q') or quit == True:
-		led_green.off()
-		led_red.off()
+		#led_green.off()
+		#led_red.off()
 		cv2.destroyAllWindows()
 		break
 
