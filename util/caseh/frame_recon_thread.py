@@ -68,6 +68,7 @@ class FrameReconThread(object):
             if self.stopped:
                 break
 
+            print("TAMANHO FILA: " +str(self.queue.qsize()))
             if self.queue.not_empty:
                 frame = self.queue.get()
                 recon_false = []
