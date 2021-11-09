@@ -51,7 +51,7 @@ class VideoUploadThread(object):
                         with pysftp.Connection(self.host, username='ubuntu', private_key=self.pem_file) as sftp:
 
                             sftp.put(_video_path, _target)
-                            shutil.move(_video_path, _video_path)
+                            shutil.move(_video_path, _video_path_uploaded)
                     except Exception:
                         print("[UPLOADER] Deu merda! " + str(sys.exc_info()))
             self.stop()
