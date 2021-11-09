@@ -59,7 +59,7 @@ class VideoRecordThread(object):
                 dtn = datetime.datetime.now()
                 minute = int(dtn.strftime('%M'))
 
-                if (minute % 2 == 0) and (last_minute != minute):
+                if (minute % 5 == 0) and (last_minute != minute):
                     last_minute = minute
                     self.output_video.release()
                     # self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
