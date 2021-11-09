@@ -7,6 +7,7 @@ from util.caseh.frame_recon_thread import FrameReconThread
 from queue import Queue
 from imutils.video import FPS
 import argparse
+import distutils
 
 import time
 import datetime
@@ -86,12 +87,13 @@ ap.add_argument("-rp", "--recon_period", required=False,
 args = vars(ap.parse_args())
 
 video_source = args["video"]
-show_video = args["show"]
-record_video = args["record"]
-fps_to_video = args["fps"]
-recon_faces = args["recon_faces"] or True
-recon_retry = args["recon_retry"] or 3
-recon_period= args["recon_period"] or 30
+show_video = int(args["show"])
+record_video = int(args["record"])
+fps_to_video = int(args["fps"]) or 30
+recon_faces = int(args["recon_faces"])
+recon_retry = int(args["recon_retry"]) or 3
+recon_period = int(args["recon_period"]) or 10
+
 last_minute = -1
 
 quit = False
@@ -106,11 +108,11 @@ fps = FPS().start()
 queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 
-if recon_faces:
+if bool(recon_faces):
 	frt = FrameReconThread('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry)
 
 vrt = None
-if record_video == 'True':
+if bool(record_video) == 'True':
 	vrt = VideoRecordThread(video_source, queue).start()
 
 # Desliga teste dos LEDs
@@ -121,6 +123,7 @@ if record_video == 'True':
 
 # loop over frames from the video file stream
 while vct.running():
+	dtn = datetime.datetime.now()
 	frame = vct.read()
 
 	if bool(recon_faces):
@@ -129,7 +132,6 @@ while vct.running():
 			print("[RECON] Inicia worker de reconhecimento: frt.start()")
 			time.sleep(5)
 
-		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frt.last_recon_datetime).total_seconds())
@@ -140,24 +142,13 @@ while vct.running():
 				frt.set_frame(frame)
 				print("[RECON] set_frame segundo: " + str(second))
 
-#		if diff_from_last_recon > int(recon_period) and frt.recon_status:
-#			frt.set_frame(frame)
-#			print("[RECON] Entrou no if diff_from_last_recon > int(recon_period)")
-
-#		if int(frt.recon_retry) > int(recon_retry) or not frt.recon_status:
-#			frt.recon_retry = 0
-#			frt.set_frame(frame)
-#			print("[RECON] Entrou no if int(frt.recon_retry) > int(recon_retry) or not frt.recon_status")
-
-		# print("[RECON] Setting frame to RECON: 1a = " + str(diff_from_last_recon > int(recon_period)) + " 2a= " + str(frt.recon_status) + " - qsize() - " + str(frt.queue.qsize()) + "- DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-
 		# verifica se o num de retentativas de identificação é maior 0
 		# se for começa a piscar o led
-	dtn_final = datetime.datetime.now() - dtn
-	print("[RECON] RECON STATUS:" + str(frt.recon_status) + " - RETRY:" + str(frt.recon_retry) + " - " + str(diff_from_last_recon) + " - " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+		dtn_final = datetime.datetime.now() - dtn
+		print("[RECON] RECON STATUS:" + str(frt.recon_status) + " - RETRY:" + str(frt.recon_retry) + " - " + str(diff_from_last_recon) + " - " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
-	# Controla LEDs
-	led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
+		# Controla LEDs
+		led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
 
 	# verifica botoes
 	# check_buttons()

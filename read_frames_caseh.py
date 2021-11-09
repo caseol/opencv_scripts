@@ -86,12 +86,12 @@ ap.add_argument("-rp", "--recon_period", required=False,
 args = vars(ap.parse_args())
 
 video_source = args["video"]
-show_video = args["show"]
-record_video = args["record"]
-fps_to_video = args["fps"]
-recon_faces = args["recon_faces"] or True
-recon_retry = args["recon_retry"] or 3
-recon_period= args["recon_period"] or 5
+show_video = int(args["show"])
+record_video = int(args["record"])
+fps_to_video = args["fps"] or 30
+recon_faces = int(args["recon_faces"])
+recon_retry = int(args["recon_retry"]) or 3
+recon_period = int(args["recon_period"]) or 10
 last_minute = -1
 
 quit = False
@@ -121,6 +121,7 @@ led_red.off()
 
 # loop over frames from the video file stream
 while vct.running():
+	dtn = datetime.datetime.now()
 	frame = vct.read()
 
 	if bool(recon_faces):
@@ -129,18 +130,23 @@ while vct.running():
 			print("[RECON] Inicia worker de reconhecimento: frt.start()")
 			time.sleep(5)
 
-		dtn = datetime.datetime.now()
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frt.last_recon_datetime).total_seconds())
 
 		# dispara o reconhecimento a cada recon_period
 		if second % int(recon_period) == 0:
-			# if frt.queue.not_full:
-			frt.set_frame(frame)
-			print("[RECON] set_frame segundo: " + str(second))
+			if frt.queue.not_full:
+				frt.set_frame(frame)
+				print("[RECON] set_frame segundo: " + str(second))
 
-	dtn_final = datetime.datetime.now() - dtn
+		# verifica se o num de retentativas de identificação é maior 0
+		# se for começa a piscar o led
+		dtn_final = datetime.datetime.now() - dtn
+		print("[RECON] RECON STATUS:" + str(frt.recon_status) + " - RETRY:" + str(frt.recon_retry) + " - " + str(diff_from_last_recon) + " - " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+
+		# Controla LEDs
+		led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
 
 	# Controla LEDs
 	led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
