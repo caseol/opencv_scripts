@@ -40,6 +40,8 @@ class VideoUploadThread(object):
             for filename in os.listdir('videos/'):
                 _target = '/home/ubuntu/railsapp/orbis_proxy/public/videos/' + filename
                 _video_path = 'videos/' + filename
+                _video_path_uploaded = 'videos/uploaded/' + filename
+
                 t = os.path.getmtime(_video_path)
                 _file_creation = datetime.datetime.fromtimestamp(t)
                 diff_from_creation = int((_dtn - _file_creation).total_seconds())
@@ -49,8 +51,7 @@ class VideoUploadThread(object):
                         with pysftp.Connection(self.host, username='ubuntu', private_key=self.pem_file) as sftp:
 
                             sftp.put(_video_path, _target)
-                            shutil.move(_video_path, 'videos/uploaded/')
-
+                            shutil.move(_video_path, _video_path)
                     except Exception:
                         print("[UPLOADER] Deu merda! " + str(sys.exc_info()))
             self.stop()
