@@ -30,10 +30,11 @@ class VideoUploadThread(object):
 
     def upload_video(self):
         _dtn = datetime.datetime.now()
+        _count_empty = 0
         while True:
             # if the thread indicator variable is set, stop the
             # thread
-            if self.stopped:
+            if self.stopped or _count_empty > 10:
                 break
 
             #  percorre a pasta e faz o upload de cada arquivo e depois move
@@ -55,8 +56,9 @@ class VideoUploadThread(object):
                             with pysftp.Connection(self.host, username='ubuntu', private_key=self.pem_file) as sftp:
                                 sftp.put(_video_path, _target)
                                 shutil.move(_video_path, _video_path_uploaded)
+                                print("[INFO] " + _video_path + " :: ENVIADO para a Cloud!")
                         except Exception:
                             print("[UPLOADER] Deu merda! " + str(sys.exc_info()))
                 else:
                     print("[INFO] " + filename + " é um diretório")
-            self.stop()
+                    _count_empty = _count_empty + 1

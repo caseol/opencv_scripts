@@ -33,7 +33,7 @@ def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
 			led_red.blink()
 			led_green.on()
-			print("[RECON] GREEN ON + PISCAR RED - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+			print("[RECON] GREEN ON + RED BLINK - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
 		if frt.recon_status == True:
