@@ -148,11 +148,6 @@ while vct.running():
 		# Controla LEDs
 		led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
 
-	# Controla LEDs
-	led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
-	print("[RECON] RECON STATUS:" + str(frt.recon_status) + " - RETRY:" + str(frt.recon_retry) + " - LED:" + str(
-		led_current_status) + " - " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-
 	# verifica botoes
 	# check_buttons()
 
