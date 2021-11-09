@@ -1,9 +1,17 @@
+from util.caseh.video_upload_thread import VideoUploadThread
 from threading import Thread
-import cv2, time, datetime
+import _thread
+import cv2
+import time
+import datetime
+import subprocess
+import logging
+
 
 
 class VideoRecordThread(object):
     def __init__(self, source, queue, prefix_name, fps=30):
+
         # flag control
         self.stopped = False
         self.Q = queue
@@ -57,7 +65,9 @@ class VideoRecordThread(object):
                     # self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
                     self.output_path = "videos/" + self.prefix_name + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
                     self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
-                    print("[INFO] " + self.output_path + " criado!")
+                    print("[INFO] " + self.output_path + " criado! Enviando para a Cloud...")
+
+                    vut = VideoUploadThread().start()
 
                 self.output_video.write(self.frame)
             else:
