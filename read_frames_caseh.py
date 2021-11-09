@@ -188,8 +188,9 @@ print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 # do a bit of cleanup
 cv2.destroyAllWindows()
 vct.stop()
-if not frt.stopped:
-	frt.stop()
+if bool(recon_faces):
+	if not frt.stopped:
+		frt.stop()
 
 # deliga LED
 exit(1)
