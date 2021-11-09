@@ -3,11 +3,12 @@ import cv2, time, datetime
 
 
 class VideoRecordThread(object):
-    def __init__(self, source, queue, fps=30):
+    def __init__(self, source, queue, prefix_name, fps=30):
         # flag control
         self.stopped = False
         self.Q = queue
         self.fps = fps
+        self.prefix_name = prefix_name
 
         # name of the source
         self.video_source = source
@@ -18,7 +19,8 @@ class VideoRecordThread(object):
         self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
         self.codec = cv2.VideoWriter_fourcc('D','I','V','X')
         # self.codec = cv2.VideoWriter_fourcc('T', 'H', 'E', 'O')
-        self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
+        # self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
+        self.output_path = "videos/" + self.prefix_name + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
         self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
 
         # inicializa variável do frame
@@ -49,10 +51,11 @@ class VideoRecordThread(object):
                 dtn = datetime.datetime.now()
                 minute = int(dtn.strftime('%M'))
 
-                if (minute % 10 == 0) and (last_minute != minute):
+                if (minute % 5 == 0) and (last_minute != minute):
                     last_minute = minute
                     self.output_video.release()
-                    self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
+                    # self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
+                    self.output_path = "videos/" + self.prefix_name + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
                     self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
                     print("[INFO] " + self.output_path + " criado!")
 

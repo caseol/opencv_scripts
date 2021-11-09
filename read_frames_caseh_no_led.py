@@ -108,12 +108,16 @@ fps = FPS().start()
 queue = Queue(maxsize=256)
 vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
 
+prefix_name = ""
 if bool(recon_faces):
 	frt = FrameReconThread('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry)
+	prefix_name = "recon_"
+else:
+	prefix_name = "monit_"
 
 vrt = None
-if bool(record_video) == 'True':
-	vrt = VideoRecordThread(video_source, queue).start()
+if bool(record_video):
+	vrt = VideoRecordThread(video_source, queue, prefix_name).start()
 
 # Desliga teste dos LEDs
 # led_green.off()
@@ -130,7 +134,7 @@ while vct.running():
 		if frt.stopped:
 			frt.start()
 			print("[RECON] Inicia worker de reconhecimento: frt.start()")
-			time.sleep(5)
+			time.sleep(3)
 
 		minute = int(dtn.strftime('%M'))
 		second = int(dtn.strftime('%S'))
