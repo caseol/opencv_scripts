@@ -14,7 +14,7 @@ class FrameReconThread(object):
         self.stopped = True
         self.dt = datetime.datetime.now()
         self.queue = Queue(maxsize=256)
-        self.data = pickle.loads(open("resources/encodings.pickle", "rb").read())
+        self.data = pickle.loads(open("resources/encodings_cnn.pickle", "rb").read())
         self.detector = cv2.CascadeClassifier("resources/haarcascade_frontalface_default.xml")
 
         # inicializa variável do frame
