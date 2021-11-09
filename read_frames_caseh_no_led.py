@@ -149,11 +149,13 @@ while vct.running():
 
 		# Controla LEDs
 		led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
+	else:
+		print("[RECON] RECON DESLIGADO!")
 
 	# verifica botoes
 	# check_buttons()
 
-	if show_video == 'True':
+	if show_video:
 		cv2.imshow(video_source, frame)
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
