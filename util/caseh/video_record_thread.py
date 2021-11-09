@@ -65,7 +65,7 @@ class VideoRecordThread(object):
                     # self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
                     self.output_path = "videos/" + self.prefix_name + dtn.strftime('%Y-%m-%d_%H_%M') + ".avi"
                     self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
-                    print("[INFO] " + self.output_path + " criado! Enviando para a Cloud...")
+                    print("[INFO] " + self.output_path + " criado!")
 
                     vut = VideoUploadThread().start()
 

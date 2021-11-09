@@ -36,15 +36,22 @@ class VideoUploadThread(object):
             if self.stopped:
                 break
 
+            _dtn = datetime.datetime.now()
             #  percorre a pasta e faz o upload de cada arquivo e depois move
             for filename in os.listdir('videos/'):
-                try:
-                    if filename.endswith(".avi"):
+                _target = '/home/ubuntu/railsapp/orbis_proxy/public/videos/' + filename
+                _video_path = 'videos/' + filename
+                t = os.path.getmtime(_video_path)
+                _file_creation = datetime.datetime.fromtimestamp(t)
+                diff_from_creation = int((_dtn - _file_creation).total_seconds())
+                if diff_from_creation > 600:
+                    try:
+                        print("[INFO] " + _video_path + "Enviando para a Cloud...")
                         with pysftp.Connection(self.host, username='ubuntu', private_key=self.pem_file) as sftp:
-                            _target = '/home/ubuntu/railsapp/orbis_proxy/public/videos/' + filename
-                            _video_path = 'videos/' + filename
+
                             sftp.put(_video_path, _target)
                             shutil.move(_video_path, 'videos/uploaded/')
 
-                except Exception:
-                    print("[UPLOADER] Deu merda! " + str(sys.exc_info()))
+                    except Exception:
+                        print("[UPLOADER] Deu merda! " + str(sys.exc_info()))
+            self.stop()
