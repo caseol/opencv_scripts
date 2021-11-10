@@ -31,7 +31,7 @@ def timestampFrame(fr):
 
 def control_led(retry_num, max_retry, led_current_status):
 	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
-			led_red.blink()
+			led_red.blink(0.7)
 			led_green.on()
 			print("[RECON] GREEN ON + RED BLINK - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 	else:
