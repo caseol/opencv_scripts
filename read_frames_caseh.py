@@ -147,6 +147,11 @@ while vct.running():
 
 		# Controla LEDs
 		led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
+
+		# verifica se tem modelo para baixar
+		if second % 50 == 0:
+			frt.update_model()
+
 	else:
 		print("[RECON] DESLIGADO!")
 

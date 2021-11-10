@@ -165,6 +165,9 @@ while vct.running():
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
+	# verifica se tem modelo para baixar
+	if second % 50 == 0:
+		frt.update_model()
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)

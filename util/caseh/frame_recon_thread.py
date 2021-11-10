@@ -5,6 +5,9 @@ import time
 import datetime
 import face_recognition
 import pickle
+import sys
+import shutil
+import pysftp
 
 
 class FrameReconThread(object):
@@ -16,6 +19,10 @@ class FrameReconThread(object):
         self.queue = Queue(maxsize=128)
         self.data = pickle.loads(open("resources/encodings.pickle", "rb").read())
         self.detector = cv2.CascadeClassifier("resources/haarcascade_frontalface_default.xml")
+
+        # credenciais para acesso a cloud
+        self.host = "api.orbis.net.br"
+        self.pem_file = '~/.ssh/authorized_keys/orbisicar.pem'
 
         # inicializa variável do frame
         self.recon_frames = []
@@ -52,6 +59,23 @@ class FrameReconThread(object):
         self.stopped = True
         # wait until stream resources are released (producer thread might be still grabbing frame)
         self.thread.join()
+
+    def update_model(self):
+
+        # verifica se existe modelo para baixar
+        try:
+            print("[INFO] Verificando a Cloud...")
+            with pysftp.Connection(self.host, username='ubuntu', private_key=self.pem_file) as sftp:
+                if sftp.exists("/home/ubuntu/railsapp/orbis_proxy/public/modelos/encodings.pickle"):
+                    file = sftp.get("/home/ubuntu/railsapp/orbis_proxy/public/modelos/encodings.pickle", "resources/encodings.pickle")
+                    sftp.remove("/home/ubuntu/railsapp/orbis_proxy/public/modelos/encodings.pickle")
+                    self.data = pickle.loads(open("resources/encodings.pickle", "rb").read())
+                else:
+                    print("[DOWNLOADER] Sem modelos novos! ")
+        except Exception:
+            print("[UPLOADER] Deu merda! " + str(sys.exc_info()))
+        # self.detector = cv2.CascadeClassifier("")
+
 
     def set_frame(self, frame):
         # self.frames.append(frame)
