@@ -47,10 +47,10 @@ class VideoUploadThread(object):
                     _video_path = 'videos/' + filename
                     _video_path_uploaded = 'videos/uploaded/' + filename
 
-                    t = os.path.getctime(_video_path)
+                    t = os.path.getmtime(_video_path)
                     _file_creation = datetime.datetime.fromtimestamp(t)
-                    diff_from_creation = int((_dtn - _file_creation).total_seconds())
-                    if diff_from_creation >= 600:
+                    diff_from_last_update = int((_dtn - _file_creation).total_seconds())
+                    if diff_from_last_update >= 600:
                         try:
                             print("[INFO] " + _video_path + " :: Enviando para a Cloud...")
                             with pysftp.Connection(self.host, username='ubuntu', private_key=self.pem_file) as sftp:
