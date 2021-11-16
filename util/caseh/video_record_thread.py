@@ -30,10 +30,6 @@ class VideoRecordThread(object):
         self.output_path = "videos/" + self.prefix_name + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
         self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
 
-        # inicializa variável do frame
-        self.frame = 0
-        self.invert_frame = False
-
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.save_frame, args=())
         self.thread.daemon = True
@@ -55,8 +51,6 @@ class VideoRecordThread(object):
             # otherwise, ensure the queue has room in it
             if not self.Q.full():
                 self.frame = self.Q.get()
-                if self.invert_frame:
-                    self.frame = cv2.flip(self.frame, -1)
                 dtn = datetime.datetime.now()
                 minute = int(dtn.strftime('%M'))
 

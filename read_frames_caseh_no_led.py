@@ -110,9 +110,12 @@ led_current_status = False
 fps = FPS().start()
 
 queue = Queue(maxsize=256)
-vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
+vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame)
+vct.inverted_frame = bool(inverted_frame)
+vct.start()
 
 prefix_name = ""
+frt = None
 if bool(recon_faces):
 	frt = FrameReconThread('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry)
 	prefix_name = "recon_"
@@ -122,8 +125,7 @@ else:
 vrt = None
 if bool(record_video):
 	vrt = VideoRecordThread(video_source, queue, prefix_name)
-	vrt.invert_frame = bool(inverted_frame)
-	vrt.start()
+
 # Desliga teste dos LEDs
 # led_green.off()
 # led_red.off()
@@ -134,6 +136,8 @@ if bool(record_video):
 while vct.running():
 	dtn = datetime.datetime.now()
 	frame = vct.read()
+	minute = int(dtn.strftime('%M'))
+	second = int(dtn.strftime('%S'))
 
 	if bool(recon_faces):
 		if frt.stopped:
@@ -141,8 +145,6 @@ while vct.running():
 			print("[RECON] Inicia worker de reconhecimento: frt.start()")
 			time.sleep(3)
 
-		minute = int(dtn.strftime('%M'))
-		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frt.last_recon_datetime).total_seconds())
 
 		# dispara o reconhecimento a cada recon_period
@@ -166,7 +168,8 @@ while vct.running():
 
 	if show_video:
 		cv2.imshow(video_source, frame)
-		if frt.final_frame is not None: cv2.imshow("RECON", frt.final_frame)
+		if frt is not None and frt.final_frame is not None:
+			cv2.imshow("RECON", frt.final_frame)
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 

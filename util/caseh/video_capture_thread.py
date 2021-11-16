@@ -21,6 +21,9 @@ class VideoCaptureThread:
 
         self.stopped = False
         self.transform = transform
+        self.inverted_frame = False
+
+        # inicializa variável do frame
 
         # used to record the time at which we processed current frame
         self.new_frame_time = 0
@@ -58,6 +61,8 @@ class VideoCaptureThread:
             if not self.Q.full():
                 # read the next frame from the file
                 frame = self.stream.read()
+                if self.inverted_frame:
+                    frame = cv2.flip(frame, -1)
 
                 # display the image width, height, and number of channels to our
                 # terminal

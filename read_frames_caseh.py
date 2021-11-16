@@ -1,12 +1,14 @@
 from util.caseh.video_capture_thread import VideoCaptureThread
 from util.caseh.video_record_thread import VideoRecordThread
 from util.caseh.frame_recon_thread import FrameReconThread
+
 # from util.fullface.frame_recon import FrameReconFullFace
 
 from gpiozero import LED, Button
 from queue import Queue
 from imutils.video import FPS
 import argparse
+import distutils
 
 import time
 import datetime
@@ -19,8 +21,8 @@ led_red = LED(27)
 led_yellow = LED(22)
 
 
-btn_main = Button(24)
-btn_aux = Button(23)
+# btn_main = Button(24)
+# btn_aux = Button(23)
 
 def timestampFrame(fr):
 	# fr = imutils.resize(fr, width=640)
@@ -30,11 +32,11 @@ def timestampFrame(fr):
 	return fr
 
 def control_led(retry_num, max_retry, led_current_status):
-	if int(retry_num) > 0 and int(retry_num) <= int(max_retry):
-			led_red.blink(0.5)
-			led_green.on()
-			led_red.blink(0.5)
-			print("[RECON] GREEN ON + RED BLINK - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+	if int(retry_num) > 0 and int(retry_num) > int(max_retry):
+		print("[RECON] GREEN ON + RED BLINK - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+		led_red.blink(0.5)
+		led_green.on()
+		led_red.blink(0.5)
 	else:
 		# Se não estiver dentro das retentativas coloca o estado atual
 		if frt.recon_status == True:
@@ -52,33 +54,32 @@ def control_led(retry_num, max_retry, led_current_status):
 	return led_current_status
 
 # def check_buttons():
-# 	if btn_main.is_pressed():
-#  		print("[BUTTON] BTN_MAIN - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-#  	if btn_aux.is_pressed():
-#  		print("[BUTTON] BTN_AUX - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-#
+# 	if btn_main.is_pressed:
+# 		print("[BUTTON] BTN_MAIN - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+# 	if btn_aux.is_pressed:
+# 		print("[BUTTON] BTN_AUX - DateTime: " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
+
 
 # Liga teste dos LEDs
-led_green.on()
-led_red.on()
-led_yellow.on()
+# led_green.on()
+# led_red.on()
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", required=True,
-	help="define o caminho do video")
+	help="define video path")
 ap.add_argument("-s", "--show", required=False,
-	help="mostra uma janela com o video")
+	help="show video window")
 ap.add_argument("-r", "--record", required=True,
-	help="salva a saída de video")
+	help="save video output")
 ap.add_argument("-f", "--fps", required=True,
 	help="define FPS")
 ap.add_argument("-rf", "--recon_faces", required=False,
-	help="ativa reconhecimento facial")
+	help="active face recognition")
 ap.add_argument("-rr", "--recon_retry", required=False,
-	help="Numero de retentativas de reconhecimento")
+	help="Number of times to retry the recon")
 ap.add_argument("-rp", "--recon_period", required=False,
-	help="Tempo em segundo para disparar uma operação de reconhecimento")
+	help="Time in seconds to trigger a recon and counter operation")
 ap.add_argument("-i", "--inverted_frame", required=False,
 	help="Indica se deve inverter ou não o video")
 
@@ -87,11 +88,12 @@ args = vars(ap.parse_args())
 video_source = args["video"]
 show_video = int(args["show"])
 record_video = int(args["record"])
-fps_to_video = args["fps"] or 30
+fps_to_video = int(args["fps"]) or 30
 recon_faces = int(args["recon_faces"])
 recon_retry = int(args["recon_retry"]) or 3
 recon_period = int(args["recon_period"]) or 10
 inverted_frame = int(args["inverted_frame"]) or 0
+
 last_minute = -1
 
 quit = False
@@ -104,9 +106,12 @@ led_current_status = False
 fps = FPS().start()
 
 queue = Queue(maxsize=256)
-vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
+vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame)
+vct.inverted_frame = bool(inverted_frame)
+vct.start()
 
 prefix_name = ""
+frt = None
 if bool(recon_faces):
 	frt = FrameReconThread('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry)
 	prefix_name = "recon_"
@@ -116,12 +121,10 @@ else:
 vrt = None
 if bool(record_video):
 	vrt = VideoRecordThread(video_source, queue, prefix_name)
-	vrt.invert_frame = bool(inverted_frame)
-	vrt.start()
 
 # Desliga teste dos LEDs
-led_green.off()
-led_red.off()
+# led_green.off()
+# led_red.off()
 
 # Reconhecimento ligado? Pisca 2x LED de controle (amarelo)
 
@@ -129,6 +132,8 @@ led_red.off()
 while vct.running():
 	dtn = datetime.datetime.now()
 	frame = vct.read()
+	minute = int(dtn.strftime('%M'))
+	second = int(dtn.strftime('%S'))
 
 	if bool(recon_faces):
 		if frt.stopped:
@@ -136,8 +141,6 @@ while vct.running():
 			print("[RECON] Inicia worker de reconhecimento: frt.start()")
 			time.sleep(3)
 
-		minute = int(dtn.strftime('%M'))
-		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frt.last_recon_datetime).total_seconds())
 
 		# dispara o reconhecimento a cada recon_period
@@ -153,22 +156,22 @@ while vct.running():
 
 		# Controla LEDs
 		led_current_status = control_led(frt.recon_retry, recon_retry, led_current_status)
-
-		# verifica se tem modelo para baixar
-		if second % 50 == 0:
-			frt.update_model()
-
 	else:
-		print("[RECON] DESLIGADO!")
+		print("[RECON] RECON DESLIGADO!")
 
 	# verifica botoes
 	# check_buttons()
 
-	if show_video == 'True':
+	if show_video:
 		cv2.imshow(video_source, frame)
+		if frt is not None and frt.final_frame is not None:
+			cv2.imshow("RECON", frt.final_frame)
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
+	# verifica se tem modelo para baixar
+	if second % 50 == 0:
+		frt.update_model()
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
@@ -189,15 +192,14 @@ fps.stop()
 print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
-# led_red.off()
-# led_green.off()
+# deliga LED
+led_red.off()
+led_green.off()
+led_yellow.off()
 
 # do a bit of cleanup
 cv2.destroyAllWindows()
 vct.stop()
-if bool(recon_faces):
-	if not frt.stopped:
-		frt.stop()
-
-# deliga LED
+if not frt.stopped:
+	frt.stop()
 exit(1)
