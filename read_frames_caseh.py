@@ -61,23 +61,26 @@ def control_led(retry_num, max_retry, led_current_status):
 # Liga teste dos LEDs
 led_green.on()
 led_red.on()
+led_yellow.on()
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", required=True,
-	help="define video path")
+	help="define o caminho do video")
 ap.add_argument("-s", "--show", required=False,
-	help="show video window")
+	help="mostra uma janela com o video")
 ap.add_argument("-r", "--record", required=True,
-	help="save video output")
+	help="salva a saída de video")
 ap.add_argument("-f", "--fps", required=True,
 	help="define FPS")
 ap.add_argument("-rf", "--recon_faces", required=False,
-	help="active face recognition")
+	help="ativa reconhecimento facial")
 ap.add_argument("-rr", "--recon_retry", required=False,
-	help="Number of times to retry the recon")
+	help="Numero de retentativas de reconhecimento")
 ap.add_argument("-rp", "--recon_period", required=False,
-	help="Time in seconds to trigger a recon and counter operation")
+	help="Tempo em segundo para disparar uma operação de reconhecimento")
+ap.add_argument("-i", "--inverted_frame", required=False,
+	help="Indica se deve inverter ou não o video")
 
 args = vars(ap.parse_args())
 
@@ -88,6 +91,7 @@ fps_to_video = args["fps"] or 30
 recon_faces = int(args["recon_faces"])
 recon_retry = int(args["recon_retry"]) or 3
 recon_period = int(args["recon_period"]) or 10
+inverted_frame = int(args["inverted_frame"]) or 0
 last_minute = -1
 
 quit = False
@@ -111,7 +115,9 @@ else:
 
 vrt = None
 if bool(record_video):
-	vrt = VideoRecordThread(video_source, queue, prefix_name).start()
+	vrt = VideoRecordThread(video_source, queue, prefix_name)
+	vrt.invert_frame = bool(inverted_frame)
+	vrt.start()
 
 # Desliga teste dos LEDs
 led_green.off()

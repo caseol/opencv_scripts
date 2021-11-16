@@ -46,8 +46,9 @@ options = {
 }
 
 vs = CamGear(source=0, logging=True, **options).start()
-# vs = VideoStream(usePiCamera=True).start()
-time.sleep(2.0)
+# vs = CamGear(source='recon_2021-11-10_16_35.avi', logging=True, **options).start()
+
+time.sleep(1.0)
 
 # start the FPS counter
 fps = FPS().start()
@@ -68,7 +69,7 @@ while True:
 
 		# detecta faces no frame em grayscale
 		rects = detector.detectMultiScale(gray, scaleFactor=1.1,
-			minNeighbors=6, minSize=(40, 40),
+			minNeighbors=6, minSize=(30, 30),
 			flags=cv2.CASCADE_SCALE_IMAGE)
 
 		# OpenCV returna as coordenadas da box no formato (x, y, w, h)

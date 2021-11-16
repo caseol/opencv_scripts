@@ -2,6 +2,7 @@
 from queue import Queue
 from threading import Thread, Lock
 import cv2
+from vidgear.gears import CamGear
 import time, datetime
 
 
@@ -9,8 +10,14 @@ class VideoCaptureThread:
     def __init__(self, path, queue=Queue(maxsize=1024), transform=None):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
-        self.stream = cv2.VideoCapture(path)
-        (self.grabbed, self.frame) = self.stream.read()
+        options = {
+            "CAP_PROP_FRAME_WIDTH": 640,
+            "CAP_PROP_FRAME_HEIGHT": 480,
+            "CAP_PROP_FPS": 10,
+        }
+        self.stream = CamGear(source=path, logging=True, **options).start()
+        # self.stream = cv2.VideoCapture(path)
+        self.frame = self.stream.read()
 
         self.stopped = False
         self.transform = transform
@@ -24,7 +31,7 @@ class VideoCaptureThread:
         # self.Q = Queue(maxsize=queue_size)
         self.Q = queue
         # add the frame to the queue
-        if self.grabbed:
+        if self.frame is not None:
             self.Q.put(self.frame)
 
         # intialize thread
@@ -50,7 +57,7 @@ class VideoCaptureThread:
             # otherwise, ensure the queue has room in it
             if not self.Q.full():
                 # read the next frame from the file
-                (grabbed, frame) = self.stream.read()
+                frame = self.stream.read()
 
                 # display the image width, height, and number of channels to our
                 # terminal
@@ -71,11 +78,6 @@ class VideoCaptureThread:
                 # converting the fps to string so that we can display it on frame
                 # by using putText function
                 fps = str(fps)
-
-                # if the `grabbed` boolean is `False`, then we have
-                # reached the end of the video file
-                if not grabbed:
-                    self.stopped = True
 
                 if frame is not None:
                     # if there are transforms to be done, might as well

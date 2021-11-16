@@ -8,7 +8,6 @@ import subprocess
 import logging
 
 
-
 class VideoRecordThread(object):
     def __init__(self, source, queue, prefix_name, fps=30):
 
@@ -33,6 +32,7 @@ class VideoRecordThread(object):
 
         # inicializa variável do frame
         self.frame = 0
+        self.invert_frame = False
 
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.save_frame, args=())
@@ -55,7 +55,8 @@ class VideoRecordThread(object):
             # otherwise, ensure the queue has room in it
             if not self.Q.full():
                 self.frame = self.Q.get()
-
+                if self.invert_frame:
+                    self.frame = cv2.flip(self.frame, -1)
                 dtn = datetime.datetime.now()
                 minute = int(dtn.strftime('%M'))
 

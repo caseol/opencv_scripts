@@ -84,6 +84,8 @@ ap.add_argument("-rr", "--recon_retry", required=False,
 	help="Number of times to retry the recon")
 ap.add_argument("-rp", "--recon_period", required=False,
 	help="Time in seconds to trigger a recon and counter operation")
+ap.add_argument("-i", "--inverted_frame", required=False,
+	help="Indica se deve inverter ou não o video")
 
 args = vars(ap.parse_args())
 
@@ -94,6 +96,7 @@ fps_to_video = int(args["fps"]) or 30
 recon_faces = int(args["recon_faces"])
 recon_retry = int(args["recon_retry"]) or 3
 recon_period = int(args["recon_period"]) or 10
+inverted_frame = int(args["inverted_frame"]) or 0
 
 last_minute = -1
 
@@ -118,8 +121,9 @@ else:
 
 vrt = None
 if bool(record_video):
-	vrt = VideoRecordThread(video_source, queue, prefix_name).start()
-
+	vrt = VideoRecordThread(video_source, queue, prefix_name)
+	vrt.invert_frame = bool(inverted_frame)
+	vrt.start()
 # Desliga teste dos LEDs
 # led_green.off()
 # led_red.off()
@@ -162,6 +166,7 @@ while vct.running():
 
 	if show_video:
 		cv2.imshow(video_source, frame)
+		if frt.final_frame is not None: cv2.imshow("RECON", frt.final_frame)
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
