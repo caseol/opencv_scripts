@@ -145,6 +145,10 @@ while vct.running():
 		if second % 50 == 0:
 			frt.update_model()
 
+		# verifica se tem modelo para baixar
+		if second % 50 == 0:
+			frt.update_model()
+
 		diff_from_last_recon = int((dtn - frt.last_recon_datetime).total_seconds())
 
 		# dispara o reconhecimento a cada recon_period

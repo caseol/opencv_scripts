@@ -124,7 +124,7 @@ else:
 
 vrt = None
 if bool(record_video):
-	vrt = VideoRecordThread(video_source, queue, prefix_name).start()
+	vrt = VideoRecordThread(video_source, queue, prefix_name)
 
 # Desliga teste dos LEDs
 # led_green.off()
@@ -168,6 +168,8 @@ while vct.running():
 
 	if show_video:
 		cv2.imshow(video_source, frame)
+		if frt is not None and frt.final_frame is not None:
+			cv2.imshow("RECON", frt.final_frame)
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
