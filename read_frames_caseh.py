@@ -141,6 +141,10 @@ while vct.running():
 			print("[RECON] Inicia worker de reconhecimento: frt.start()")
 			time.sleep(3)
 
+		# verifica se tem modelo para baixar
+		if second % 50 == 0:
+			frt.update_model()
+
 		diff_from_last_recon = int((dtn - frt.last_recon_datetime).total_seconds())
 
 		# dispara o reconhecimento a cada recon_period
@@ -168,10 +172,6 @@ while vct.running():
 			cv2.imshow("RECON", frt.final_frame)
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
-
-	# verifica se tem modelo para baixar
-	if second % 50 == 0:
-		frt.update_model()
 
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
