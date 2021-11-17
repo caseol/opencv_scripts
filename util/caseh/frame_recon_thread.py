@@ -25,7 +25,7 @@ class FrameReconThread(object):
         self.pem_file = '~/.ssh/authorized_keys/orbisicar.pem'
 
         # inicializa variável do frame
-        self.recon_frames = []
+        self.final_frame = None
         self.small_frame = 0
 
         # incitialize paths
@@ -70,6 +70,7 @@ class FrameReconThread(object):
                     file = sftp.get("/home/ubuntu/railsapp/orbis_proxy/public/modelos/encodings.pickle", "resources/encodings.pickle")
                     sftp.remove("/home/ubuntu/railsapp/orbis_proxy/public/modelos/encodings.pickle")
                     self.data = pickle.loads(open("resources/encodings.pickle", "rb").read())
+                    print("[DOWNLOADER] NOVO MODELO BAIXADO! ")
                 else:
                     print("[DOWNLOADER] Sem modelos novos! ")
         except Exception:
@@ -108,11 +109,13 @@ class FrameReconThread(object):
                 rects = self.detector.detectMultiScale(gray, scaleFactor=1.1,
                                                   minNeighbors=6, minSize=(40, 40),
                                                   flags=cv2.CASCADE_SCALE_IMAGE)
+                contador = str(rects.shape[0])
 
                 # OpenCV returna as coordenadas da box no formato (x, y, w, h)
                 # mas precisamos delas no formato (top, right, bottom, left), então
                 # precisamos reordenar as coordenadas
                 boxes = [(y, x + w, y + h, x) for (x, y, w, h) in rects]
+
 
                 # calcula os encodings/pontos para cada face nas boxes para comparar com o modelo
                 encodings = face_recognition.face_encodings(rgb, boxes)
@@ -168,6 +171,7 @@ class FrameReconThread(object):
                     y = top - 15 if top - 15 > 15 else top + 15
                     cv2.putText(frame, name, (left, y), cv2.FONT_HERSHEY_SIMPLEX,
                                 0.75, _color, 2)
+                self.final_frame = frame
 
                 # temos que sumarizar os frames para poder extrair a contagem e o reconhecimento
                 # self.count_recon = names.count()

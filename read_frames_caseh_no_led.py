@@ -84,6 +84,8 @@ ap.add_argument("-rr", "--recon_retry", required=False,
 	help="Number of times to retry the recon")
 ap.add_argument("-rp", "--recon_period", required=False,
 	help="Time in seconds to trigger a recon and counter operation")
+ap.add_argument("-i", "--inverted_frame", required=False,
+	help="Indica se deve inverter ou não o video")
 
 args = vars(ap.parse_args())
 
@@ -94,6 +96,7 @@ fps_to_video = int(args["fps"]) or 30
 recon_faces = int(args["recon_faces"])
 recon_retry = int(args["recon_retry"]) or 3
 recon_period = int(args["recon_period"]) or 10
+inverted_frame = int(args["inverted_frame"]) or 0
 
 last_minute = -1
 
@@ -107,9 +110,12 @@ led_current_status = False
 fps = FPS().start()
 
 queue = Queue(maxsize=256)
-vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame).start()
+vct = VideoCaptureThread(args["video"], queue, transform=timestampFrame)
+vct.inverted_frame = bool(inverted_frame)
+vct.start()
 
 prefix_name = ""
+frt = None
 if bool(recon_faces):
 	frt = FrameReconThread('recon/todo/', 'recon/cropped/', 'recon/done/', max_retry=recon_retry)
 	prefix_name = "recon_"
@@ -130,6 +136,8 @@ if bool(record_video):
 while vct.running():
 	dtn = datetime.datetime.now()
 	frame = vct.read()
+	minute = int(dtn.strftime('%M'))
+	second = int(dtn.strftime('%S'))
 
 	if bool(recon_faces):
 		if frt.stopped:
@@ -137,8 +145,6 @@ while vct.running():
 			print("[RECON] Inicia worker de reconhecimento: frt.start()")
 			time.sleep(3)
 
-		minute = int(dtn.strftime('%M'))
-		second = int(dtn.strftime('%S'))
 		diff_from_last_recon = int((dtn - frt.last_recon_datetime).total_seconds())
 
 		# dispara o reconhecimento a cada recon_period
@@ -165,10 +171,6 @@ while vct.running():
 	else:
 		print("[RECON] NÃO MOSTRA VÍDEO " + dtn.strftime('%Y-%m-%d_%H_%M_%S'))
 
-	# verifica se tem modelo para baixar
-	if second % 50 == 0:
-		frt.update_model()
-
 	# Press Q on keyboard to stop recording
 	key = cv2.waitKey(1)
 	if key == ord('q') or quit == True:
@@ -177,7 +179,7 @@ while vct.running():
 		cv2.destroyAllWindows()
 		break
 
-	if vct.Q.qsize() < 2:  # If we are low on frames, give time to producer
+	if vct.Q.qsize() < 2:  #q If we are low on frames, give time to producer
 		time.sleep(0.001)  # Ensures producer runs now, so 2 is sufficient
 	fps.update()
 	frame = None

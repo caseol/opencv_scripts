@@ -8,7 +8,6 @@ import subprocess
 import logging
 
 
-
 class VideoRecordThread(object):
     def __init__(self, source, queue, prefix_name, fps=30):
 
@@ -24,15 +23,12 @@ class VideoRecordThread(object):
         self.dt = datetime.datetime.now()
 
         # Set up codec and output video settings
-        self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
+        # self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
         self.codec = cv2.VideoWriter_fourcc('D','I','V','X')
         # self.codec = cv2.VideoWriter_fourcc('T', 'H', 'E', 'O')
         # self.output_path = "videos/" + self.video_source.split('/')[-1] + "_" + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
         self.output_path = "videos/" + self.prefix_name + self.dt.strftime('%Y-%m-%d_%H_%M')+".avi"
         self.output_video = cv2.VideoWriter(self.output_path, self.codec, self.fps, (640, 480))
-
-        # inicializa variável do frame
-        self.frame = 0
 
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.save_frame, args=())
@@ -55,7 +51,6 @@ class VideoRecordThread(object):
             # otherwise, ensure the queue has room in it
             if not self.Q.full():
                 self.frame = self.Q.get()
-
                 dtn = datetime.datetime.now()
                 minute = int(dtn.strftime('%M'))
 
